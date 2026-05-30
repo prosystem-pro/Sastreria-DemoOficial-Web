@@ -1,0 +1,1044 @@
+<app-spinner-global [visible]="Procesando"></app-spinner-global>
+<!-- Modal Confirmación Pedido -->
+<div *ngIf="MostrarModalConfirmacion"
+    class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+    style="background: rgba(0,0,0,0.5); z-index: 1050;">
+
+    <div class="card shadow-sm" style="min-width: 300px; max-width: 400px; border-radius: 0.5rem; overflow: hidden;">
+
+        <!-- HEADER -->
+        <div class="d-flex justify-content-center align-items-center position-relative p-2" style="background: #000;">
+            <h5 class="m-0 fw-bold text-white text-center w-100">Confirmar Pedido</h5>
+            <!-- Botón Cerrar -->
+            <button (click)="MostrarModalConfirmacion = false"
+                class="btn p-0 d-flex justify-content-center align-items-center"
+                style="width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #000; font-weight: bold; border: 1px solid #ccc; position: absolute; top: 8px; right: 8px;">
+                X
+            </button>
+        </div>
+
+        <!-- CONTENIDO -->
+        <div class="p-3" style="background: #fff; color: #000;">
+
+            <!-- Forma de Pago -->
+            <div class="mb-3">
+                <label class="form-label small">Forma de Pago</label>
+                <select class="form-select form-select-sm" [(ngModel)]="FormaPagoSeleccionada"
+                    (ngModelChange)="onFormaPagoChange()" [ngModelOptions]="{standalone:true}">
+                    <option [ngValue]="null" disabled>Seleccione forma de pago</option>
+                    <option *ngFor="let fp of FormaPago" [ngValue]="fp.CodigoFormaPago">
+                        {{ fp.NombreFormaPago }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Monto -->
+            <div class="mb-3">
+                <label class="form-label small">Monto</label>
+                <input type="text" class="form-control form-control-sm" placeholder="Ingrese monto"
+                    [(ngModel)]="MontoPago" (input)="SoloNumerosEnterosMonto($event)"
+                    [ngModelOptions]="{standalone:true}" inputmode="numeric">
+            </div>
+            <!-- Referencia tarjeta -->
+            <div class="mb-3" *ngIf="EsTarjetaSeleccionada">
+                <label class="form-label small">Referencia</label>
+                <input type="text" class="form-control form-control-sm" placeholder="Ingrese referencia"
+                    [(ngModel)]="ReferenciaPago" [ngModelOptions]="{standalone:true}">
+            </div>
+
+            <!-- Botón Confirmar -->
+            <button class="btn btn-success w-100 fw-bold" (click)="ConfirmarPedido()">Confirmar</button>
+
+        </div>
+
+    </div>
+</div>
+<!-- MODAL CLIENTE -->
+<div class="modal fade" id="modalCliente" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Crear Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body">
+                <app-gestion-cliente [EsModal]="true" (ClienteGuardado)="ClienteCreado($event)">
+                </app-gestion-cliente>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="MostrarPedido" class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9 col-xl-7">
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-dark rounded-top">
+                <button class="btn btn-light btn-sm me-2"
+                    (click)="IrARuta('/pedido-listado', VerOtros ? { verOtros: true } : null)"
+                    style="width:30px;height:30px;border-radius:50%;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <h5 class="text-white m-0 text-center w-100">
+                    {{ Modo === 'CREAR' ? 'Nuevo Pedido' : 'Editar Pedido' }}
+                </h5>
+                <!-- <button class="btn btn-light btn-sm"
+                    (click)="IrARuta('/pedido-listado', VerOtros ? { verOtros: true } : null)"
+                    style="width:30px;height:30px;border-radius:50%;">
+                    <i class="bi bi-x-lg"></i>
+                </button> -->
+            </div>
+            <!-- CARD PRINCIPAL -->
+            <div class="card border-top-0 rounded-top-0 shadow-sm p-3">
+                <form (ngSubmit)="Guardar()">
+                    <div class="row">
+                        <!-- EMPRESA (SOLO CUANDO VER OTROS) -->
+                        <div class="col-12 mb-3" *ngIf="VerOtros">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-building text-secondary"></i>
+                                Empresa
+                            </label>
+
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="Pedido.NombreEmpresa"
+                                name="NombreEmpresa" disabled>
+                        </div>
+                        <!-- CLIENTE -->
+                        <div class="col-12 mb-3">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-person-fill text-primary"></i>
+                                Cliente
+                            </label>
+                            <div class="position-relative">
+                                <div class="input-group input-group-sm" style="cursor:pointer"
+                                    (click)="!VerOtros && Modo !== 'EDITAR' && AlternarListaBusqueda('Cliente',$event)">
+                                    <!-- BUSCADOR -->
+                                    <input type="text" class="form-control" placeholder="Buscar cliente"
+                                        [(ngModel)]="Filtros['Cliente']" [ngModelOptions]="{standalone:true}"
+                                        [disabled]="VerOtros || Modo === 'EDITAR'" style="cursor:text">
+                                    <!-- FLECHA -->
+                                    <span class="input-group-text" style="background:white;border-left:0;"
+                                        *ngIf="!VerOtros && Modo !== 'EDITAR'">
+                                        <i class="bi bi-caret-down-fill"></i>
+                                    </span>
+
+                                    <!-- BOTON NUEVO CLIENTE -->
+                                    <button type="button" class="btn" style="background:black;color:white;width:34px"
+                                        data-bs-toggle="modal" data-bs-target="#modalCliente"
+                                        (click)="$event.stopPropagation()" [disabled]="VerOtros || Modo === 'EDITAR'">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+
+                                </div>
+
+                                <!-- LISTA -->
+                                <ul class="list-group position-absolute w-100 shadow-sm"
+                                    *ngIf="MostrarListas['Cliente'] && Filtrados('Cliente', Clientes, 'NombreCliente').length > 0"
+                                    style="z-index:1000;max-height:150px;overflow-y:auto;font-size:0.85rem">
+
+                                    <li class="list-group-item list-group-item-action py-1"
+                                        *ngFor="let c of Filtrados('Cliente',Clientes,'NombreCliente')" (mousedown)="AplicarSeleccion(
+        'Cliente',
+        c,
+        Pedido,
+        'CodigoCliente',
+        'NombreCliente',
+        'NombreCliente'
+    )">
+
+                                        {{ c.NombreCliente }}
+
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- FECHA ENTREGA -->
+                        <!-- <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event text-info"></i>
+                                Fecha Entrega
+                            </label>
+
+                            <div class="position-relative">
+
+                                <input type="text" class="form-control form-control-sm pe-5"
+                                    [value]="FechaEntregaFormateada" placeholder="dd/MM/yyyy" readonly
+                                   (click)="!(EsAsociada() || (EsOficial() && Modo === 'EDITAR' && !VerOtros)) && AbrirDatePicker()">
+
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-2"
+                                    style="cursor: pointer;" (click)="!EsAsociada() && AbrirDatePicker()">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+
+                                <input #dateInput type="date"
+                                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                    [(ngModel)]="Pedido.FechaEntrega" name="FechaEntrega" (change)="OnFechaChange()"
+                                    [disabled]="EsAsociada()">
+
+                            </div>
+                        </div> -->
+
+                        <!-- FECHA ENTREGA -->
+                        <!-- <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event text-info"></i>
+                                Fecha Entrega
+                            </label>
+
+                            <div class="position-relative">
+
+                                <input type="text" class="form-control form-control-sm pe-5"
+                                    [value]="FechaEntregaFormateada" placeholder="dd/MM/yyyy" readonly
+                                    (click)="!(EsAsociada() || (EsOficial() && Modo === 'EDITAR' && !VerOtros)) && AbrirDatePicker()"
+                                    style="cursor: pointer;"
+                                    [disabled]="EsAsociada() || (EsOficial() && Modo === 'EDITAR' && !VerOtros)">
+
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-2"
+                                    style="cursor: pointer;"
+                                    (click)="!(EsAsociada() || (EsOficial() && Modo === 'EDITAR' && !VerOtros)) && AbrirDatePicker()">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+
+                                <input #dateInput type="date"
+                                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                    [(ngModel)]="Pedido.FechaEntrega" name="FechaEntrega" (change)="OnFechaChange()"
+                                    [disabled]="EsAsociada() || (EsOficial() && Modo === 'EDITAR' && !VerOtros)">
+                            </div>
+                        </div> -->
+                        <!-- FECHA ENTREGA -->
+                        <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event text-info"></i>
+                                Fecha Entrega
+                            </label>
+
+                            <div class="position-relative">
+
+                                <!-- INPUT BONITO -->
+                                <input type="text" class="form-control form-control-sm pe-5"
+                                    [value]="FechaEntregaFormateada" placeholder="dd/MM/yyyy" readonly (click)="!(EsAsociada()
+                || (EsOficial() && Modo === 'EDITAR' && !VerOtros)
+                || (EsOficial() && Modo === 'EDITAR' && VerOtros
+                   && FechaCargadaDeBackend === true)) && AbrirDatePicker()" style="cursor: pointer;" [disabled]="EsAsociada()
+                || (EsOficial() && Modo === 'EDITAR' && !VerOtros)
+                || (EsOficial() && Modo === 'EDITAR' && VerOtros
+                    && FechaCargadaDeBackend === true)"> <!-- CAMBIO -->
+
+                                <!-- ICONO CALENDARIO -->
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-2"
+                                    style="cursor: pointer;" (click)="!(EsAsociada()
+                || (EsOficial() && Modo === 'EDITAR' && !VerOtros)
+                || (EsOficial() && Modo === 'EDITAR' && VerOtros
+                    && FechaCargadaDeBackend === true)) && AbrirDatePicker()"> <!-- CAMBIO -->
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+
+                                <!-- INPUT REAL OCULTO -->
+                                <input #dateInput type="date"
+                                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                    [(ngModel)]="Pedido.FechaEntrega" name="FechaEntrega" (change)="OnFechaChange()"
+                                    [disabled]="EsAsociada()
+                || (EsOficial() && Modo === 'EDITAR' && !VerOtros)
+                || (EsOficial() && Modo === 'EDITAR' && VerOtros
+                    && FechaCargadaDeBackend === true)"> <!-- CAMBIO -->
+
+                            </div>
+                        </div>
+                        <!-- ESTADO -->
+                        <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-flag-fill text-warning"></i>
+                                Estado
+                            </label>
+
+                            <select class="form-select form-select-sm" [(ngModel)]="Pedido.CodigoEstadoPedido"
+                                name="CodigoEstadoPedido" [disabled]="EsAsociada()">
+
+                                <option [ngValue]="null" disabled>
+                                    Seleccione estado
+                                </option>
+
+                                <option *ngFor="let estado of EstadoPedido" [ngValue]="estado.CodigoEstadoPedido">
+                                    {{ estado.NombreEstadoPedido }}
+                                </option>
+
+                            </select>
+                        </div>
+                        <!-- DESCUENTO -->
+                        <div class="col-12 col-md-6 mb-3" *ngIf="(EsOficial() || EsSuperAdmin()) && !VerOtros">
+
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-percent text-success"></i>
+                                Descuento
+                            </label>
+
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="Pedido.Descuento"
+                                (input)="SoloEnterosDescuento($event)" (ngModelChange)="CalcularTotales()"
+                                name="Descuento" [disabled]="Modo === 'EDITAR'">
+                        </div>
+
+                    </div>
+
+                    <!-- BOTONES -->
+                    <div class="row align-items-center mt-3">
+
+                        <div class="col-5">
+                            <button type="button" (click)="AbrirProductos()" class="btn w-100 text-white fw-bold"
+                                style="background:#36b048;font-size:0.9rem;">
+
+                                <i class="bi bi-file-plus-fill me-1"></i>
+                                Productos
+                            </button>
+                        </div>
+
+                        <div class="col-2"></div>
+
+                        <div class="col-5">
+                            <button type="button" (click)="AbrirPagos()" class="btn w-100 text-white fw-bold"
+                                [disabled]="Modo === 'CREAR'"
+                                [ngStyle]="{'background': Modo === 'CREAR' ? '#6c757d' : '#36b048'}"
+                                style="font-size:0.9rem; cursor: pointer;">
+                                <i class="bi bi-file-plus-fill me-1"></i>
+                                Pagos
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- TOTALES -->
+                    <div class="container mt-4">
+
+                        <!-- MODO CREAR -->
+                        <div *ngIf="Modo === 'CREAR'" class="row justify-content-center">
+
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card shadow-sm text-center p-3">
+
+                                    <div class="text-muted" style="font-size:0.85rem">
+                                        Total de tu orden
+                                    </div>
+
+                                    <div class="fw-bold fs-4 text-success">
+                                        {{ Pedido.Total || 0 | currency:'GTQ':'symbol':'1.2-2' }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- MODO EDITAR -->
+                        <div *ngIf="Modo === 'EDITAR'" class="row g-2 justify-content-center">
+
+                            <!-- TOTAL -->
+                            <div class="col-4 col-md-4 col-lg-3">
+                                <div class="card shadow-sm text-center p-2 h-100">
+
+                                    <div class="text-muted" style="font-size:0.75rem">
+                                        Total de tu orden
+                                    </div>
+
+                                    <div class="fw-bold text-success" style="font-size:1rem">
+                                        {{ Pedido.Total || 0 | currency:'GTQ':'symbol':'1.2-2' }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- ABONADO -->
+                            <div class="col-4 col-md-4 col-lg-3">
+                                <div class="card shadow-sm text-center p-2 h-100">
+
+                                    <div class="text-muted" style="font-size:0.75rem">
+                                        Abonado
+                                    </div>
+
+                                    <div class="fw-bold text-primary" style="font-size:1rem">
+                                        {{ Pedido.TotalAbonado || 0 | currency:'GTQ':'symbol':'1.2-2' }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- SALDO -->
+                            <div class="col-4 col-md-4 col-lg-3">
+                                <div class="card shadow-sm text-center p-2 h-100">
+
+                                    <div class="text-muted" style="font-size:0.75rem">
+                                        Saldo pendiente
+                                    </div>
+
+                                    <div class="fw-bold text-danger" style="font-size:1rem">
+                                        {{ Pedido.SaldoPendiente || 0 | currency:'GTQ':'symbol':'1.2-2' }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- GUARDAR -->
+                    <div class="text-center mt-4">
+
+                        <button class="btn text-white fw-bold px-4" style="background:#36b048;font-size:0.9rem;"
+                            type="submit">
+
+                            <i class="bi bi-save-fill me-1"></i>
+                            {{ Modo === 'CREAR' ? 'Guardar' : 'Actualizar' }}
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div *ngIf="MostrarProductos" class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9 col-xl-7">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-dark rounded-top">
+                <h5 class="text-white m-0 text-center w-100 d-flex justify-content-center align-items-center gap-2">
+                    <i class="bi bi-box-seam"></i> Productos
+                </h5>
+                <button class="btn btn-light btn-sm" (click)="VolverPedido()"
+                    style="width:30px;height:30px;border-radius:50%;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- CARD PRINCIPAL -->
+            <div class="card border-top-0 rounded-top-0 shadow-sm p-2">
+                <!-- FECHA Y CLIENTE -->
+                <div class="px-1">
+                    <b>{{ Pedido.FechaEntrega }} |</b>
+                </div>
+
+                <!-- TITULO -->
+                <h6 class="fw-semibold mt-2 px-1 small">Agregar Productos</h6>
+                <hr class="mt-2 mb-2">
+
+                <!-- CARD FORMULARIO PRODUCTO -->
+                <div class="card p-2 shadow-sm mt-1">
+                    <form>
+                        <div class="row">
+
+                            <!-- TIPO PRODUCTO -->
+                            <div class="col-12 mb-2">
+                                <label class="form-label small mb-1">Tipo Producto</label>
+
+                                <div class="mb-2 position-relative" style="max-width: 300px;">
+
+                                    <div class="input-group input-group-sm"
+                                        [style.cursor]="VerOtros ? 'not-allowed' : 'pointer'"
+                                        (click)="!VerOtros && AlternarListaBusqueda('TipoProducto', $event)">
+
+                                        <!-- INPUT -->
+                                        <input type="text" class="form-control form-control-sm"
+                                            placeholder="Buscar tipo producto" [(ngModel)]="Filtros['TipoProducto']"
+                                            [ngModelOptions]="{standalone: true}" [disabled]="VerOtros">
+
+                                        <!-- FLECHA -->
+                                        <span class="input-group-text" *ngIf="!VerOtros"
+                                            style="background: white; border-left: 0;">
+                                            <i class="bi bi-caret-down-fill"></i>
+                                        </span>
+
+                                    </div>
+
+                                    <!-- LISTA -->
+                                    <ul class="list-group position-absolute w-100 shadow-sm" *ngIf="!VerOtros
+                    && MostrarListas['TipoProducto']
+                    && Filtrados('TipoProducto', TiposProducto, 'NombreTipoProducto').length > 0"
+                                        style="z-index: 1000; max-height: 150px; overflow-y: auto; font-size: 0.85rem;">
+
+                                        <li class="list-group-item list-group-item-action py-1"
+                                            *ngFor="let t of Filtrados('TipoProducto', TiposProducto, 'NombreTipoProducto')"
+                                            (mousedown)="AplicarSeleccion('TipoProducto', t, ProductoTemp, 'CodigoTipoProducto', 'NombreTipoProducto', 'NombreTipoProducto')">
+
+                                            {{ t.NombreTipoProducto }}
+
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                            <!-- PRODUCTO -->
+                            <div class="col-6 mb-2">
+                                <label class="form-label small mb-1">Producto</label>
+
+                                <div class="mb-2 position-relative" style="max-width: 300px;">
+
+                                    <div class="input-group input-group-sm" [class.bloqueado]="EsSoloLectura()"
+                                        [style.cursor]="EsSoloLectura() ? 'not-allowed' : 'pointer'"
+                                        (click)="!EsSoloLectura() && AlternarListaBusqueda('Producto', $event)">
+
+                                        <input type="text" class="form-control form-control-sm"
+                                            placeholder="Buscar producto" [(ngModel)]="Filtros['Producto']"
+                                            [ngModelOptions]="{standalone: true}" [disabled]="EsSoloLectura()"
+                                            [disabled]="EsSoloLectura() || !ProductoTemp.CodigoTipoProducto">
+
+                                        <span class="input-group-text" *ngIf="!EsSoloLectura()"
+                                            style="background: white; border-left: 0;">
+                                            <i class="bi bi-caret-down-fill"></i>
+                                        </span>
+
+                                    </div>
+
+                                    <ul class="list-group position-absolute w-100 shadow-sm" *ngIf="!EsSoloLectura()
+                    && MostrarListas['Producto']
+                    && Filtrados('Producto', Productos, 'NombreProducto').length > 0"
+                                        style="z-index: 1000; max-height: 150px; overflow-y: auto; font-size: 0.85rem;">
+
+                                        <li class="list-group-item list-group-item-action py-1 d-flex justify-content-between align-items-center"
+                                            *ngFor="let p of Filtrados('Producto', Productos, 'NombreProducto')"
+                                            (mousedown)="AplicarSeleccionProducto(p)">
+
+                                            {{ p.NombreProducto }}
+
+                                            <span class="badge" [ngClass]="{
+                    'bg-danger': p.StockActual === 0,
+                    'bg-warning text-dark': p.StockActual > 0 && p.StockActual <= 10,
+                    'bg-success': p.StockActual > 10
+                }">
+                                                {{ p.StockActual }}
+                                            </span>
+
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                            <!-- TIPO TELA -->
+                            <div class="col-6 mb-2">
+                                <label class="form-label small mb-1">Tipo Tela</label>
+
+                                <div class="mb-2 position-relative" style="max-width: 300px;">
+
+                                    <div class="input-group input-group-sm"
+                                        [class.bloqueado]="EsSoloLectura() || BloquearTipoTela() || Rol === 'EMPRESA_ASOCIADA'"
+                                        [style.cursor]="(EsSoloLectura() || BloquearTipoTela()) || Rol === 'EMPRESA_ASOCIADA' ? 'not-allowed' : 'pointer'"
+                                        (click)="(!(EsSoloLectura() || BloquearTipoTela()) || Rol === 'EMPRESA_ASOCIADA') && AlternarListaBusqueda('TipoTela', $event)">
+
+                                        <input type="text" class="form-control form-control-sm"
+                                            placeholder="Buscar tipo de tela" [(ngModel)]="Filtros['TipoTela']"
+                                            [ngModelOptions]="{standalone: true}"
+                                            [disabled]="EsSoloLectura() || BloquearTipoTela()"
+                                            [disabled]="EsSoloLectura()  || Rol === 'EMPRESA_ASOCIADA' || !ProductoTemp.CodigoProducto || ProductoTemp.NombreTipoProducto === 'FISICO'">
+
+                                        <span class="input-group-text" *ngIf="!(EsSoloLectura() || BloquearTipoTela())"
+                                            style="background: white; border-left: 0;">
+                                            <i class="bi bi-caret-down-fill"></i>
+                                        </span>
+
+                                    </div>
+
+                                    <ul class="list-group position-absolute w-100 shadow-sm" *ngIf="((!(EsSoloLectura() || BloquearTipoTela())) || Rol === 'EMPRESA_ASOCIADA')
+&& MostrarListas['TipoTela']
+&& Filtrados('TipoTela', TiposTela, 'NombreTipoTela').length > 0"
+                                        style="z-index: 1000; max-height: 150px; overflow-y: auto; font-size: 0.85rem;">
+
+                                        <li class="list-group-item list-group-item-action py-1"
+                                            *ngFor="let t of Filtrados('TipoTela', TiposTela, 'NombreTipoTela')"
+                                            (mousedown)="AplicarSeleccion('TipoTela', t, ProductoTemp, 'CodigoTipoTela', 'NombreTipoTela', 'NombreTipoTela')">
+
+                                            {{ t.NombreTipoTela }}
+
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                            <!-- NOMBRE TELA -->
+                            <div class="col-4 mb-2">
+                                <label class="form-label small mb-1">Nombre Tela</label>
+
+                                <div class="mb-2 position-relative" style="max-width: 300px;">
+                                    <!-- INPUT SIMPLE SOLO EMPRESA_ASOCIADA -->
+                                    <input *ngIf="Rol === 'EMPRESA_ASOCIADA'" type="text"
+                                        class="form-control form-control-sm" placeholder="Nombre tela"
+                                        [(ngModel)]="ProductoTemp.NombreTela" [ngModelOptions]="{standalone: true}"
+                                        [disabled]="ProductoTemp.NombreTipoProducto === 'FISICO'">
+                                    <div class="input-group input-group-sm" *ngIf="Rol !== 'EMPRESA_ASOCIADA'"
+                                        [style.cursor]="(VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO') ? 'not-allowed' : 'pointer'"
+                                        (click)="!(VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO') && AlternarListaBusqueda('NombreTela', $event)">
+
+                                        <!-- INPUT -->
+                                        <input type="text" class="form-control form-control-sm"
+                                            placeholder="Buscar nombre de tela" [(ngModel)]="Filtros['NombreTela']"
+                                            [ngModelOptions]="{standalone: true}"
+                                            [disabled]="VerOtros || !ProductoTemp.CodigoTipoTela || ProductoTemp.NombreTipoProducto === 'FISICO'">
+
+                                        <!-- FLECHA -->
+                                        <span class="input-group-text"
+                                            *ngIf="!(VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO')"
+                                            style="background: white; border-left: 0;">
+                                            <i class="bi bi-caret-down-fill"></i>
+                                        </span>
+
+                                    </div>
+
+                                    <!-- LISTA -->
+                                    <ul class="list-group position-absolute w-100 shadow-sm" *ngIf="!(VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO')
+                    && MostrarListas['NombreTela']
+                    && Filtrados('NombreTela', Telas, 'NombreTela').length > 0"
+                                        style="z-index: 1000; max-height: 150px; overflow-y: auto; font-size: 0.85rem;">
+
+                                        <li class="list-group-item list-group-item-action py-1"
+                                            *ngFor="let t of Filtrados('NombreTela', Telas, 'NombreTela')"
+                                            (mousedown)="AplicarSeleccion('NombreTela', t, ProductoTemp, 'CodigoTela', 'NombreTela', 'NombreTela')">
+
+                                            {{ t.NombreTela }}
+
+                                        </li>
+                                    </ul>
+
+                                </div>
+                            </div>
+
+                            <!-- CÓDIGO -->
+                            <div class="col-4 mb-2">
+                                <label class="form-label small mb-1">Código</label>
+                                <input type="text" inputmode="numeric" class="form-control form-control-sm"
+                                    placeholder="Ingrese código" [(ngModel)]="ProductoTemp.Codigo"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [disabled]="VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO'">
+                            </div>
+
+                            <!-- COLOR -->
+                            <div class="col-4 mb-2">
+                                <label class="form-label small mb-1">Color</label>
+                                <input type="text" inputmode="numeric" class="form-control form-control-sm"
+                                    placeholder="Ingrese color" [(ngModel)]="ProductoTemp.Color"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [disabled]="VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO'">
+                            </div>
+
+                            <!-- CANTIDAD -->
+                            <div class="col-4 mb-2">
+                                <label class="form-label small mb-1">Cantidad</label>
+                                <input type="number" class="form-control form-control-sm" placeholder="Ingrese cantidad"
+                                    [(ngModel)]="ProductoTemp.Cantidad" [ngModelOptions]="{standalone: true}"
+                                    [disabled]="VerOtros" min="1" step="1" (input)="SoloNumerosEnteros($event)">
+                            </div>
+
+                            <!-- PRECIO -->
+                            <div class="col-4 mb-2" *ngIf="(EsOficial() || EsSuperAdmin()) && !VerOtros">
+                                <label class="form-label small mb-1">Precio</label>
+                                <input type="number" class="form-control form-control-sm" placeholder="Ingrese precio"
+                                    [(ngModel)]="ProductoTemp.Precio" [ngModelOptions]="{standalone: true}" disabled>
+                            </div>
+
+                            <!-- REFERENCIA -->
+                            <div class="col-4 mb-2">
+                                <label class="form-label small mb-1">Referencia</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="Referencia"
+                                    [(ngModel)]="ProductoTemp.Referencia" [ngModelOptions]="{standalone:true}"
+                                    [disabled]="VerOtros || ProductoTemp.NombreTipoProducto === 'FISICO'">
+                            </div>
+
+                        </div>
+
+                        <div class="text-center mt-2">
+                            <button type="button" class="btn text-white fw-bold px-4"
+                                style="background:#36b048; font-size:0.85rem;" (click)="AgregarProducto()">
+                                <i class="bi bi-plus-circle me-1"></i> Agregar
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- LISTA DE PRODUCTOS -->
+            <h6 class="fw-semibold mt-3 px-1 small">Lista de Productos</h6>
+            <hr class="mt-2 mb-2">
+            <div class="card p-2 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th style="width:20%">Cant.</th>
+                                <th style="width:40%">Producto</th>
+                                <th style="width:20%">Precio</th>
+                                <th style="width:20%">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let prod of Pedido.Productos" class="small fila-deslizable"
+                                style="cursor:pointer;" (dblclick)="AbrirMedidas(prod)"
+                                (mousedown)="IniciarArrastreProducto($event, prod)"
+                                (mousemove)="DuranteArrastreProducto($event)" (mouseup)="FinalizarArrastreProducto()"
+                                (mouseleave)="FinalizarArrastreProducto()"
+                                (touchstart)="IniciarArrastreProducto($event, prod)"
+                                (touchmove)="DuranteArrastreProducto($event)" (touchend)="FinalizarArrastreProducto()">
+                                <td colspan="4" class="p-0">
+                                    <div class="fila-contenido">
+                                        <table class="w-100">
+                                            <tr>
+                                                <td style="width:20%">{{ prod.Cantidad }}</td>
+                                                <td style="width:40%">
+                                                    <!-- <span
+                                                        [class.text-warning]=" prod.NombreTipoProducto === 'CONFECCION' && !prod.Medidas?.TipoCuello && !prod.Medidas?.Largo && !prod.Medidas?.Espalda && !prod.Medidas?.LargoManga && !prod.Medidas?.AnchoBrazo && !prod.Medidas?.Pecho && !prod.Medidas?.Cintura && !prod.Medidas?.CinturaT && !prod.Medidas?.Cuello && !prod.Medidas?.Descripcion "
+                                                        class="fw-semibold">
+                                                        {{ prod.NombreProducto }}
+                                                        <i *ngIf="  prod.NombreTipoProducto === 'CONFECCION' &&  !prod.Medidas?.TipoCuello && !prod.Medidas?.Largo && !prod.Medidas?.Espalda && !prod.Medidas?.LargoManga && !prod.Medidas?.AnchoBrazo && !prod.Medidas?.Pecho && !prod.Medidas?.Cintura && !prod.Medidas?.CinturaT && !prod.Medidas?.Cuello && !prod.Medidas?.Descripcion "
+                                                            class="bi bi-exclamation-triangle-fill ms-1 text-warning"
+                                                            title="Faltan medidas">
+                                                        </i>
+                                                    </span> -->
+                                                    <span [class.text-warning]="TieneErrorMedidas(prod) "
+                                                        class="fw-semibold">
+                                                        {{ prod.NombreProducto }}
+                                                        <i *ngIf="TieneErrorMedidas(prod)"
+                                                            class="bi bi-exclamation-triangle-fill ms-1 text-warning"
+                                                            title="Faltan medidas">
+                                                        </i>
+                                                    </span>
+                                                </td>
+                                                <td style="width:20%">
+
+                                                    <!-- 🔥 VER OTROS: SIEMPRE EDITABLE -->
+                                                    <input *ngIf="VerOtros" type="number"
+                                                        class="form-control form-control-sm" [(ngModel)]="prod.Precio"
+                                                        (ngModelChange)="ActualizarSubtotal(prod)" min="0" step="0.01"
+                                                        placeholder="0.00">
+
+                                                    <!-- 👇 LÓGICA NORMAL -->
+                                                    <ng-container *ngIf="!VerOtros">
+
+                                                        <!-- SOLO LECTURA -->
+                                                        <span *ngIf="EsOficial() || EsSuperAdmin()">
+                                                            Q{{ prod.Precio | number:'1.2-2' }}
+                                                        </span>
+
+                                                        <!-- EDITABLE PARA ASOCIADA -->
+                                                        <input *ngIf="EsAsociada()" type="number"
+                                                            class="form-control form-control-sm"
+                                                            [(ngModel)]="prod.Precio"
+                                                            (ngModelChange)="ActualizarSubtotal(prod)" min="0"
+                                                            step="0.01" placeholder="0.00" disabled>
+
+                                                    </ng-container>
+
+                                                </td>
+
+                                                <td style="width:20%" class="fw-semibold text-success">
+                                                    Q{{ prod.Subtotal | number:'1.2-2' }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- RESUMEN -->
+                <div class="text-end mt-2">
+                    <p class="mb-1" *ngIf="EsOficial() || EsSuperAdmin()">Subtotal: Q{{ Pedido.Subtotal | number:'1.2-2'
+                        }}</p>
+                    <p class="mb-1" *ngIf="EsOficial() || EsSuperAdmin()">Descuento: -Q{{ (Pedido.Subtotal *
+                        (Pedido.Descuento || 0) / 100) | number:'1.2-2'
+                        }}</p>
+                    <p class="fw-bold">Total: Q{{ Pedido.Total | number:'1.2-2' }}</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div *ngIf="MostrarMedidas" class="container mt-3">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9 col-xl-7">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-dark rounded-top">
+
+                <h5 class="text-white m-0 text-center w-100">
+                    <i class="bi bi-rulers"></i>
+                    Medidas
+                </h5>
+
+                <button class="btn btn-light btn-sm" (click)="VolverProductos()"
+                    style="width:30px;height:30px;border-radius:50%;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <div class="card border-top-0 rounded-top-0 shadow-sm p-3">
+
+                <!-- FECHA / CLIENTE -->
+                <div class="px-1">
+                    <b>{{ Pedido.FechaEntrega }} |</b>
+                    {{ Pedido.NombreCliente }}
+                </div>
+
+                <!-- INFO PRODUCTO -->
+                <div class="small mb-1">
+                    {{ProductoMedidas?.NombreProducto}} -
+                    {{ProductoMedidas?.NombreTipoTela}} -
+                    {{ProductoMedidas?.NombreTela}} -
+                    {{ProductoMedidas?.Codigo}} -
+                    {{ProductoMedidas?.Color}}
+                </div>
+
+                <!-- REFERENCIA -->
+                <div class="small mb-3">
+                    <b>{{ProductoMedidas?.Referencia}}</b>
+                </div>
+
+                <!-- 🔵 SELECTS -->
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-md-6" *ngFor="let campo of ObtenerCamposPorTipo('select')">
+
+                        <label class="small">
+                            {{ TituloMedidas[campo]?.label }}
+                        </label>
+
+                        <select class="form-select form-select-sm" [(ngModel)]="ProductoMedidas.Medidas[campo]">
+
+                            <option value="" disabled>
+                                {{ ObtenerPlaceholder(campo).replace('Ingrese', 'Seleccione') }}
+                            </option>
+                            <!-- <option *ngFor="let item of OpcionesSelect[campo] || []" [ngValue]="item.value">
+                                {{ item.label }}
+                            </option> -->
+                            <option *ngFor="let item of ObtenerOpcionesSelect(campo)" [ngValue]="item.value">
+                                {{ item.label }}
+                            </option>
+                        </select>
+
+                    </div>
+                </div>
+
+
+                <!-- 🟢 INPUTS BLOQUEADOS -->
+                <div class="border border-2 border-secondary rounded-3 p-3 mb-3 shadow-sm">
+                    <div class="row g-2 mb-2">
+                        <div class="col-6" *ngFor="let campo of ObtenerCamposNoDescripcion()">
+
+                            <label class="small fw-bold text-center d-block">
+                                {{ TituloMedidas[campo]?.label }}
+                            </label>
+
+                            <!-- NUMBER -->
+                            <input *ngIf="TituloMedidas[campo]?.tipo === 'number'" type="number"
+                                class="form-control form-control-sm bg-light border border-secondary fw-bold text-center"
+                                [placeholder]="ObtenerPlaceholder(campo)" [(ngModel)]="ProductoMedidas.Medidas[campo]">
+
+                            <!-- TEXT -->
+                            <input *ngIf="TituloMedidas[campo]?.tipo === 'text'" type="text"
+                                class="form-control form-control-sm bg-light border border-secondary fw-bold text-center"
+                                [placeholder]="ObtenerPlaceholder(campo)" [(ngModel)]="ProductoMedidas.Medidas[campo]">
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🔴 DESCRIPCIÓN -->
+                <div class="row">
+                    <div class="col-12" *ngFor="let campo of ObtenerDescripcion()">
+
+                        <label class="small text-center d-block">
+                            {{ TituloMedidas[campo]?.label }}
+                        </label>
+
+                        <textarea class="form-control form-control-sm" rows="2"
+                            [placeholder]="ObtenerPlaceholder(campo)" [(ngModel)]="ProductoMedidas.Medidas[campo]">
+            </textarea>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div *ngIf="MostrarPagos" class="container mt-3">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9 col-xl-7">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-dark rounded-top">
+
+                <h5 class="text-white m-0 text-center w-100 d-flex justify-content-center align-items-center gap-2">
+                    <i class="bi bi-cash-coin"></i>
+                    Pagos
+                </h5>
+
+                <button class="btn btn-light btn-sm" (click)="VolverPedido()"
+                    style="width:30px;height:30px;border-radius:50%;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <!-- CARD PRINCIPAL -->
+            <div class="card border-top-0 rounded-top-0 shadow-sm p-3">
+
+                <!-- FECHA Y CLIENTE -->
+                <div class="mb-2">
+                    <b>{{ Pedido.FechaEntrega }}</b>
+                    |
+                    {{ Pedido.NombreCliente }}
+                </div>
+                <!-- REGISTRAR ABONO -->
+                <div class="small" *ngIf="!EsAsociada()">
+                    <b>Registrar Abono</b>
+                </div>
+
+                <hr class="mt-2 mb-3" *ngIf="!EsAsociada()">
+
+                <!-- FORMULARIO -->
+                <div class="d-flex gap-2 align-items-end" *ngIf="!EsAsociada()">
+
+                    <!-- FORMA DE PAGO -->
+                    <div class="flex-fill">
+                        <label class="small">Forma de pago</label>
+
+                        <select class="form-select form-select-sm" [(ngModel)]="FormaPagoSeleccionada"
+                            (ngModelChange)="OnCambioFormaPago()" [ngModelOptions]="{standalone:true}">
+
+                            <option [ngValue]="null" disabled>
+                                Seleccione
+                            </option>
+
+                            <option *ngFor="let fp of FormaPago" [ngValue]="fp.CodigoFormaPago">
+                                {{ fp.NombreFormaPago }}
+                            </option>
+
+                        </select>
+                    </div>
+                    <div class="flex-fill" *ngIf="EsTarjetaSeleccionada">
+
+                        <label class="small">Referencia</label>
+
+                        <input type="text" class="form-control form-control-sm" placeholder="No. comprobante"
+                            [(ngModel)]="ReferenciaPago" [ngModelOptions]="{standalone:true}">
+                    </div>
+                    <!-- CANTIDAD -->
+                    <!-- CANTIDAD -->
+                    <div class="flex-fill">
+                        <label class="small">Cantidad a abonar</label>
+
+                        <input type="text" class="form-control form-control-sm" placeholder="0.00"
+                            [(ngModel)]="MontoPago" [ngModelOptions]="{standalone:true}"
+                            (input)="SoloNumerosPagos($event)" inputmode="decimal">
+                    </div>
+
+
+                    <!-- BOTON -->
+                    <div style="min-width:120px;">
+                        <button class="btn text-white fw-bold w-100"
+                            style="background:#36b048; font-size:0.75rem; height:31px; margin-top:18px;"
+                            (click)="GuardarPago()" [disabled]="Procesando">
+
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Agregar
+                        </button>
+                    </div>
+
+                </div>
+                <!-- HISTORIAL -->
+                <hr class="mt-4 mb-2">
+
+                <h6 class="fw-semibold small mb-0">
+                    Historial de abonos
+                </h6>
+
+                <div class="table-responsive mt-2" *ngIf="ListaPagos.length > 0">
+
+                    <table class="table table-sm table-bordered align-middle text-center">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:50px;">No.</th>
+                                <th>Fecha</th>
+                                <th>Pago</th>
+                                <th>Monto</th>
+                                <th style="width:80px;">Documento</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let p of ListaPagos">
+
+                                <td>{{ p.Correlativo }}</td>
+
+                                <td>
+                                    {{ p.Fecha | date:'dd/MM/yyyy HH:mm' }}
+                                </td>
+
+                                <td>
+                                    {{ p.FormaPago }}
+                                </td>
+
+                                <td>
+                                    {{ p.Monto | currency:'GTQ':'symbol':'1.2-2' }}
+                                </td>
+
+                                <!-- DOCUMENTO -->
+                                <td>
+
+                                    <button (click)="DescargarPDFPago(p.CodigoPago)" class="btn btn-sm btn-outline-dark"
+                                        title="Descargar PDF" style="border-radius:6px;">
+
+                                        <i class="bi bi-file-earmark-pdf"></i>
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <!-- FILA TOTAL -->
+                            <tr class="table-light fw-bold">
+
+                                <td colspan="3" class="text-start">
+                                    Total abonado
+                                </td>
+
+                                <td>
+                                    {{ TotalAbonadoPagos | currency:'GTQ':'symbol':'1.2-2' }}
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div *ngIf="ListaPagos.length === 0" class="text-center text-muted small mt-2">
+                    No hay pagos registrados
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

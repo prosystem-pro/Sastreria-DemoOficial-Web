@@ -1,0 +1,128 @@
+<app-spinner-global [visible]="Procesando"></app-spinner-global>
+<!-- LISTADO DE VENTAS -->
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-dark rounded-3">
+        <h5 class="text-white m-0" style="font-size: 1rem;">Ventas</h5>
+        <div class="d-flex align-items-center gap-2">
+            <button (click)="IrARuta('/menu')"
+                class="btn btn-light btn-sm d-flex align-items-center justify-content-center p-0"
+                style="width:30px;height:30px;border-radius:50%;">
+                <i class="bi bi-x-lg" style="font-size:0.8rem;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mb-2">
+        <button (click)="IrARuta('/venta-gestion')"
+            class="btn btn-success btn-sm d-flex align-items-center justify-content-center">
+            <i class="bi bi-file-plus-fill me-1"></i> Nueva Venta
+        </button>
+    </div>
+
+    <!-- FILTRO FECHAS -->
+    <div class="row g-2 mb-2">
+
+        <!-- FECHA INICIO -->
+        <div class="col position-relative">
+
+            <input type="text" class="form-control form-control-sm border-dark pe-5" [value]="FechaInicioFormateada"
+                placeholder="dd/MM/yyyy" readonly (click)="AbrirDatePicker('inicio')" style="cursor: pointer;">
+
+            <span class="position-absolute top-50 end-0 translate-middle-y me-2" style="cursor: pointer;"
+                (click)="AbrirDatePicker('inicio')">
+                <i class="bi bi-calendar3"></i>
+            </span>
+
+            <input #dateInicio type="date" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                [(ngModel)]="FechaInicio" (change)="OnFechaInicioChange()">
+
+        </div>
+
+        <!-- FECHA FIN -->
+        <div class="col position-relative">
+
+            <input type="text" class="form-control form-control-sm border-dark pe-5" [value]="FechaFinFormateada"
+                placeholder="dd/MM/yyyy" readonly (click)="AbrirDatePicker('fin')" style="cursor: pointer;">
+
+            <span class="position-absolute top-50 end-0 translate-middle-y me-2" style="cursor: pointer;"
+                (click)="AbrirDatePicker('fin')">
+                <i class="bi bi-calendar3"></i>
+            </span>
+
+            <input #dateFin type="date" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                [(ngModel)]="FechaFin" (change)="OnFechaFinChange()">
+
+        </div>
+
+    </div>
+    <!-- Buscador -->
+    <div class="input-group input-group-sm border border-dark rounded mb-2">
+        <input type="text" class="form-control border-0" placeholder="Buscar ventas" [(ngModel)]="Busqueda"
+            (input)="FiltrarVentas()">
+        <span class="input-group-text bg-transparent border-0">
+            <i class="bi bi-search"></i>
+        </span>
+    </div>
+    <!-- FILTROS -->
+    <div class="mb-2">
+
+        <div class="d-flex justify-content-between align-items-center border rounded p-1 bg-white">
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'FechaCreacion'"
+                [class.btn-light]="CampoOrden !== 'FechaCreacion'" (click)="OrdenarPor('FechaCreacion')">
+
+                Fecha
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('FechaCreacion')"></i>
+            </button>
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'Total'"
+                [class.btn-light]="CampoOrden !== 'Total'" (click)="OrdenarPor('Total')">
+
+                Monto
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('Total')"></i>
+            </button>
+
+        </div>
+
+    </div>
+    <!-- LISTADO DE VENTAS -->
+    <div class="row g-2">
+        <div *ngFor="let Venta of VentasFiltradas; let i = index" class="col-md-6">
+            <div class="card" (mousedown)="IniciarArrastre($event, i)" (touchstart)="IniciarArrastre($event, i)"
+                style="cursor:pointer; position:relative;">
+
+                <!-- ICONOS PDF E IMPRESION -->
+                <div class="position-absolute top-0 end-0 p-2 d-flex gap-1">
+                    <button class="btn btn-sm btn-dark"
+                        (click)="DescargarPDF(Venta.CodigoPedido); $event.stopPropagation()"
+                        (touchstart)="$event.stopPropagation()" title="Descargar PDF">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-secondary"
+                        (click)="IrAVentaImpresion(Venta.CodigoPedido); $event.stopPropagation()"
+                        (touchstart)="$event.stopPropagation()" title="Imprimir">
+                        <i class="bi bi-printer-fill"></i>
+                    </button>
+                </div>
+
+                <div class="card-body p-2">
+                    <div class="fw-bold mb-1" style="font-size:0.9rem;">{{ Venta.NombreCliente }}</div>
+                    <div class="text-muted mb-1" style="font-size:0.75rem;">
+                        Fecha: {{ Venta.FechaCreacion }}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center" style="font-size:0.85rem;">
+                        <div class="fw-bold text-success">Q {{ Venta.Total }}</div>
+                        <div class="text-muted">Atendido: {{ Venta.Usuario }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENSAJES -->
+    <div *ngIf="Cargando" class="alert alert-info mt-2">Cargando ventas...</div>
+    <div *ngIf="!Cargando && VentasFiltradas.length === 0" class="alert alert-warning mt-2">No hay ventas registradas.
+    </div>
+    <div *ngIf="Error" class="alert alert-danger mt-2">{{ Error }}</div>
+</div>

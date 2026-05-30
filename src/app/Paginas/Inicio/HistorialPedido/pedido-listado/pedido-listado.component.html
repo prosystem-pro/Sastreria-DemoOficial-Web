@@ -1,0 +1,202 @@
+<app-spinner-global [visible]="Procesando"></app-spinner-global>
+<div class="container mt-2">
+
+    <!-- TÍTULO -->
+    <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-dark rounded-3">
+        <h5 class="text-white m-0" style="font-size: 1rem;">Pedidos</h5>
+        <button (click)="IrARuta(ObtenerRutaMenu())"
+            class="btn btn-light btn-sm d-flex align-items-center justify-content-center p-0"
+            style="width:30px;height:30px;border-radius:50%;">
+            <i class="bi bi-x-lg" style="font-size:0.8rem;"></i>
+        </button>
+    </div>
+
+    <!-- BOTÓN NUEVO PEDIDO -->
+    <div class="mb-2 text-center" *ngIf="!VerOtros">
+        <button (click)="IrARuta('/pedido-gestion')"
+            class="btn btn-sm d-flex align-items-center justify-content-center mx-auto"
+            style="background-color:#28a745;color:#fff;font-size:0.85rem;">
+            <i class="bi bi-file-plus-fill me-1"></i> Crear Pedido
+        </button>
+    </div>
+
+    <!-- FILTRO FECHAS -->
+    <div class="row g-2 mb-2">
+
+        <!-- FECHA INICIO -->
+        <div class="col position-relative">
+
+            <input type="text" class="form-control form-control-sm border-dark pe-5" [value]="FechaInicioFormateada"
+                placeholder="dd/MM/yyyy" readonly (click)="AbrirDatePicker('inicio')" style="cursor: pointer;">
+
+            <span class="position-absolute top-50 end-0 translate-middle-y me-2" style="cursor: pointer;"
+                (click)="AbrirDatePicker('inicio')">
+                <i class="bi bi-calendar3"></i>
+            </span>
+
+            <input #dateInicio type="date" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                [(ngModel)]="FechaInicio" (change)="OnFechaInicioChange()">
+
+        </div>
+
+        <!-- FECHA FIN -->
+        <div class="col position-relative">
+
+            <input type="text" class="form-control form-control-sm border-dark pe-5" [value]="FechaFinFormateada"
+                placeholder="dd/MM/yyyy" readonly (click)="AbrirDatePicker('fin')" style="cursor: pointer;">
+
+            <span class="position-absolute top-50 end-0 translate-middle-y me-2" style="cursor: pointer;"
+                (click)="AbrirDatePicker('fin')">
+                <i class="bi bi-calendar3"></i>
+            </span>
+
+            <input #dateFin type="date" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                [(ngModel)]="FechaFin" (change)="OnFechaFinChange()">
+
+        </div>
+
+    </div>
+    <!-- BUSCADOR -->
+    <div class="input-group input-group-sm border border-dark rounded mb-2">
+        <input type="text" class="form-control border-0" placeholder="Buscar pedidos" [(ngModel)]="Busqueda"
+            (input)="FiltrarPedidos()">
+
+        <span class="input-group-text bg-transparent border-0">
+            <i class="bi bi-search"></i>
+        </span>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="mb-2">
+
+        <div class="d-flex justify-content-between align-items-center border rounded p-1 bg-white">
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'NombreCliente'"
+                [class.btn-light]="CampoOrden !== 'NombreCliente'" (click)="OrdenarPor('NombreCliente')">
+
+                Nombre
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('NombreCliente')"></i>
+            </button>
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'FechaCreacion'"
+                [class.btn-light]="CampoOrden !== 'FechaCreacion'" (click)="OrdenarPor('FechaCreacion')">
+
+                Creado
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('FechaCreacion')"></i>
+            </button>
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'FechaEntrega'"
+                [class.btn-light]="CampoOrden !== 'FechaEntrega'" (click)="OrdenarPor('FechaEntrega')">
+
+                Entrega
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('FechaEntrega')"></i>
+            </button>
+
+            <button class="btn btn-sm flex-fill" [class.btn-dark]="CampoOrden === 'Total'"
+                [class.btn-light]="CampoOrden !== 'Total'" (click)="OrdenarPor('Total')">
+
+                Monto
+                <i class="bi ms-1" [ngClass]="ObtenerIconoOrden('Total')"></i>
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- PEDIDOS -->
+    <div class="row g-2">
+        <div *ngFor="let Pedido of PedidosFiltrados" class="col-md-6">
+
+            <!-- Contenedor con overflow hidden -->
+            <div class="card fila-deslizable-wrapper" (dblclick)="IrAGestion(Pedido.CodigoPedido)"
+                (mousedown)="IniciarArrastre($event, Pedido)" (mousemove)="DuranteArrastre($event)"
+                (mouseup)="FinalizarArrastre()" (mouseleave)="FinalizarArrastre()"
+                (touchstart)="IniciarArrastre($event, Pedido)" (touchmove)="DuranteArrastre($event)"
+                (touchend)="FinalizarArrastre()">
+
+                <!-- Contenido que se mueve -->
+                <div class="fila-contenido d-flex"
+                    [style.transform]="'translateX(' + (Pedido.Desplazamiento || 0) + 'px)'">
+
+                    <div class="card-body p-2">
+                        <!-- BOTONES ACCIONES -->
+                        <div class="d-flex gap-1 position-absolute top-0 end-0 m-1">
+
+                            <!-- PDF -->
+                            <button (click)="DescargarPDF(Pedido.CodigoPedido)"
+                                *ngIf="EsSuperAdmin() || (EsOficial() && !VerOtros)"
+                                class="btn btn-sm btn-outline-dark p-1" title="Descargar PDF">
+
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </button>
+
+                            <!-- IMPRIMIR -->
+                            <button class="btn btn-sm btn-secondary p-1"
+                                (click)="IrAVentaImpresion(Pedido.CodigoPedido); $event.stopPropagation()"
+                                (touchstart)="$event.stopPropagation()" title="Imprimir">
+
+                                <i class="bi bi-printer-fill"></i>
+                            </button>
+
+                        </div>
+                        <!-- NOMBRE -->
+                        <h6 class="fw-bold mb-1" style="font-size:0.9rem;">
+                            {{ Pedido.NombreCliente }}
+
+                            <span class="text-muted fw-normal"
+                                *ngIf="EsAsociada() || EsSuperAdmin() || (EsOficial() && VerOtros)">
+                                | {{ Pedido.NombreEmpresa }}
+                            </span>
+                        </h6>
+
+                        <!-- FECHAS Y MONTO -->
+                        <div class="text-muted mb-1" style="font-size:0.75rem;">
+                            Creado: {{ Pedido.FechaCreacion }}
+                            <span class="mx-1">|</span>
+                            Entrega: {{ Pedido.FechaEntrega }}
+                            <span class="mx-1">|</span>
+                            Monto: {{ Pedido.Total | currency:'GTQ':'symbol':'1.2-2' }}
+                        </div>
+
+                        <!-- ESTATUS + ATENDIDO + SALDO -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap"
+                            style="font-size:0.75rem;">
+                            <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-0 fw-bold me-2"
+                                [ngClass]="ObtenerClaseEstatus(Pedido.NombreEstatus)" style="font-size:0.6rem;">
+                                <i [ngClass]="ObtenerIconoEstatus(Pedido.NombreEstatus)" class="fs-6"
+                                    style="font-weight:900;"></i>
+                                {{ Pedido.NombreEstatus }}
+                            </button>
+
+                            <span class="text-muted me-2">
+                                Atendido: {{ Pedido.Usuario || 'Sin asignar' }}
+                            </span>
+
+                            <span class="text-muted">
+                                Saldo pendiente:
+                                <span class="fw-bold" style="color:#ff3333;">
+                                    {{ Pedido.SaldoPendiente | currency:'GTQ':'symbol':'1.2-2' }}
+                                </span>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- MENSAJES -->
+    <div *ngIf="Cargando" class="alert alert-info mt-2">
+        Cargando pedidos...
+    </div>
+
+    <div *ngIf="!Cargando && PedidosFiltrados.length === 0" class="alert alert-warning mt-2">
+        No hay pedidos registrados.
+    </div>
+
+    <div *ngIf="Error" class="alert alert-danger mt-2">
+        {{ Error }}
+    </div>
+
+</div>

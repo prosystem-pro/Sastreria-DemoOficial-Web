@@ -1,0 +1,164 @@
+<div class="print-wrapper">
+
+    <!-- BOTONES -->
+    <div class="no-print container text-center mt-3 mb-3">
+
+        <button class="btn btn-danger" (click)="cerrar()">
+            <i class="bi bi-x-circle me-1"></i>
+            Cerrar
+        </button>
+
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="Procesando" class="text-center mt-3">
+        Cargando pago...
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="d-flex justify-content-center w-100">
+
+        <div *ngIf="datosImpresion" id="ticket-impresion" class="ticket bg-white">
+
+            <!-- LOGO -->
+            <div class="text-center mb-2">
+                <img src="LogoConfeccionesCreateliFactura.jpeg" alt="logo" class="img-fluid"
+                    style="width:75%; max-width:300px; height:auto;">
+            </div>
+
+            <!-- EMPRESA -->
+            <!-- <div class="text-center fw-bold fs-4 mb-2">
+                {{ datosImpresion.empresa.nombre }}
+            </div> -->
+
+            <div class="text-center mb-0">
+                NIT: {{ datosImpresion.empresa.nit }}
+            </div>
+
+            <div class="text-center mb-0">
+                {{ datosImpresion.empresa.direccion }}
+            </div>
+
+            <div class="text-center mb-0">
+                Tel: {{ datosImpresion.empresa.telefono }}
+            </div>
+
+            <hr class="linea">
+
+            <!-- TITULO -->
+            <div class="text-center fw-bold fs-5 mb-1">
+                Datos de comprobante
+            </div>
+
+            <!-- CLIENTE / PEDIDO -->
+            <div class="row mb-0">
+
+                <!-- IZQUIERDA -->
+                <div class="col-6">
+
+                    <div class="mb-0">
+                        Fecha: {{ datosImpresion.fechaPago }}
+                    </div>
+
+                    <div class="mb-0">
+                        Atendió: {{ datosImpresion.pedido.usuario }}
+                    </div>
+
+                    <div class="mb-0">
+                        Nombre: {{ datosImpresion.cliente.nombre }}
+                    </div>
+
+                    <div class="mb-0">
+                        Dirección: {{ datosImpresion.cliente.direccion }}
+                    </div>
+
+                    <div class="mb-0">
+                        Fecha Entrega: {{ datosImpresion.pedido.fechaEntrega }}
+                    </div>
+
+                </div>
+
+                <!-- DERECHA -->
+                <div class="col-6">
+
+                    <div class="mb-0">
+                        Documento: {{ datosImpresion.pago.documento }}
+                    </div>
+
+                    <div class="mb-0">
+                        Nit: {{ datosImpresion.cliente.nit }}
+                    </div>
+
+                    <div class="mb-0">
+                        Celular: {{ datosImpresion.cliente.celular }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr class="linea">
+            <div class="fw-bold mb-0">
+                Documento: {{ datosImpresion.pedido.documento }}
+            </div>
+            <!-- HISTORIAL -->
+            <div class="text-center fw-bold fs-5 mb-0">
+                Historial de abonos
+            </div>
+
+            <!-- TOTALES IZQUIERDA -->
+            <div class="mb-1">
+
+                <div class="mb-0">
+                    Saldo anterior:
+                    Q {{ datosImpresion.totales.saldoAnterior.toFixed(2) }}
+                </div>
+
+                <div class="mb-0">
+                    Abono:
+                    Q {{ datosImpresion.totales.abono.toFixed(2) }}
+                </div>
+
+                <div class="fw-bold">
+                    Saldo actual:
+                    Q {{ datosImpresion.totales.saldoPendiente.toFixed(2) }}
+                </div>
+
+            </div>
+
+            <hr class="linea">
+
+            <!-- FORMA DE PAGO -->
+            <div class="text-center fw-bold fs-5 mb-1">
+                Forma de pago
+            </div>
+
+            <table class="w-100 mb-1">
+
+                <tr>
+                    <td>
+                        {{ datosImpresion.pago.nombre }}
+
+                        <span *ngIf="datosImpresion.pago.referencia">
+                            - Ref: {{ datosImpresion.pago.referencia }}
+                        </span>
+                    </td>
+
+                    <td class="text-end">
+                        Q {{ datosImpresion.pago.monto.toFixed(2) }}
+                    </td>
+                </tr>
+
+            </table>
+
+            <hr class="linea">
+
+            <div class="text-center fs-5 mt-3">
+                Gracias por su pago
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
