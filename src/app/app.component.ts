@@ -5,7 +5,7 @@ import { HeaderComponent } from './Componentes/header/header.component';
 import { FooterComponent } from './Componentes/footer/footer.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SpinnerGlobalComponent } from './Componentes/spinner-global/spinner-global.component'; // 👈 agregar
+import { SpinnerGlobalComponent } from './Componentes/spinner-global/spinner-global.component'; 
 
 @Component({
   selector: 'app-root',

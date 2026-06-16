@@ -133,12 +133,13 @@
       <div class="text-end mb-0">
         Descuento ({{ datosImpresion.totales.descuento }}%):
         Q {{
-        (
-        datosImpresion.totales.subtotal *
-        (datosImpresion.totales.descuento / 100)
-        ).toFixed(2)
+        calcularDescuentoConRegla(
+        datosImpresion.totales.subtotal,
+        datosImpresion.totales.descuento
+        )
         }}
       </div>
+
 
       <div class="text-end fw-bold fs-5 mb-0">
         Total de tu orden:

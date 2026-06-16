@@ -129,9 +129,7 @@ export class ConfiguracionGestionComponent {
       });
 
   }
-  // ========================
-  // CATALOGOS
-  // ========================
+
 
   CargarCatalogos() {
 
@@ -202,9 +200,6 @@ export class ConfiguracionGestionComponent {
 
   }
 
-  // ========================
-  // BUSCADOR
-  // ========================
 
   AlternarListaBusqueda(tipo: string, e: Event) {
 
@@ -256,9 +251,7 @@ export class ConfiguracionGestionComponent {
 
   }
 
-  // ========================
-  // PANEL
-  // ========================
+
 
   AgregarNuevo(tipo: string) {
 
@@ -353,11 +346,6 @@ export class ConfiguracionGestionComponent {
   }
 
 
-
-  // ========================
-  // GUARDAR / EDITAR
-  // ========================
-
   GuardarCatalogo() {
 
     if (!this.NombreNuevoCatalogo) {
@@ -365,9 +353,6 @@ export class ConfiguracionGestionComponent {
       return;
     }
 
-    // =========================
-    // TIPO TELA
-    // =========================
 
     if (this.PanelCatalogoActivo === 'TipoTela') {
 
@@ -461,9 +446,6 @@ export class ConfiguracionGestionComponent {
       }
     }
 
-    // =========================
-    // NOMBRE TELA
-    // =========================
 
     if (this.PanelCatalogoActivo === 'NombreTela') {
 
@@ -748,10 +730,6 @@ export class ConfiguracionGestionComponent {
     return item.NombreTela;
   }
 
-  // ========================
-  // PRODUCTO
-  // ========================
-
   Guardar() {
 
     if (!this.Inventario.TipoTela) {
@@ -769,9 +747,6 @@ export class ConfiguracionGestionComponent {
       return;
     }
 
-    // ======================
-    // EDITAR
-    // ======================
 
     if (this.ModoEdicionProducto) {
 
@@ -830,9 +805,6 @@ export class ConfiguracionGestionComponent {
 
     }
 
-    // ======================
-    // CREAR
-    // ======================
 
     else {
 
@@ -900,19 +872,16 @@ export class ConfiguracionGestionComponent {
 
     let texto = this.NombreNuevoCatalogo;
 
-    // 1. SOLO letras y espacios (aquí estaba el error antes)
+
     texto = texto.replace(/[^a-zA-Z\s]/g, '');
 
-    // 2. evitar múltiples espacios
-    texto = texto.replace(/\s+/g, ' ').trimStart(); // 👈 importante NO usar solo trim()
 
-    // 3. Title Case (cada palabra inicia en mayúscula)
+    texto = texto.replace(/\s+/g, ' ').trimStart();
     texto = texto.toLowerCase()
       .replace(/\b\w/g, c => c.toUpperCase());
 
     this.NombreNuevoCatalogo = texto;
 
-    // 4. sincronizar visualmente input
     if (event?.target) {
       event.target.value = texto;
     }
@@ -923,20 +892,16 @@ export class ConfiguracionGestionComponent {
 
   let texto = this.NombreNuevoCatalogo;
 
-  // 1. SOLO letras, números y espacios
   texto = texto.replace(/[^a-zA-Z0-9\s]/g, '');
 
-  // 2. evitar múltiples espacios y espacios al inicio
   texto = texto.replace(/\s+/g, ' ').trimStart();
 
-  // 3. Title Case
   texto = texto
     .toLowerCase()
     .replace(/\b\w/g, c => c.toUpperCase());
 
   this.NombreNuevoCatalogo = texto;
 
-  // 4. sincronizar visualmente
   if (event?.target) {
     event.target.value = texto;
   }
@@ -945,20 +910,15 @@ export class ConfiguracionGestionComponent {
 
     let valor = event.target.value || '';
 
-    // 1. solo letras y espacios (en tiempo real)
     valor = valor.replace(/[^a-zA-Z\s]/g, '');
 
-    // 2. espacios limpios
     valor = valor.replace(/\s+/g, ' ');
 
-    // 3. title case
     valor = valor.toLowerCase()
       .replace(/\b\w/g, (c: string) => c.toUpperCase());
 
-    // 4. asignar directamente al input (SIN esperar ngModel sync)
     event.target.value = valor;
 
-    // 5. sincronizar modelo angular sin delay visible
     this.Inventario.Producto = valor;
   }
 }

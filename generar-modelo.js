@@ -4,12 +4,10 @@ const axios = require('axios');
 const apiUrl = 'https://sastreria-confeccionescreateli-api-production.up.railway.app/api/generar-modelos';
 const modelsDirectory = './src/app/Modelos/';
 
-// Asegura que el directorio exista
 if (!fs.existsSync(modelsDirectory)) {
   fs.mkdirSync(modelsDirectory, { recursive: true });
 }
 
-// Convierte todas las propiedades en opcionales
 function hacerPropiedadesOpcionales(modelInterface) {
   return modelInterface.replace(/(\s+)(\w+):/g, '$1$2?:');
 }

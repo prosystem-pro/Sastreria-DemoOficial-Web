@@ -48,7 +48,6 @@ export class ConfiguracionListadoComponent implements OnInit {
     });
   }
   cerrarSiClickFuera(event: MouseEvent) {
-    // Si no hay producto expandido, no hacemos nada
     if (this.ProductoExpandido === null) return;
 
     let clicDentro = false;
@@ -61,7 +60,6 @@ export class ConfiguracionListadoComponent implements OnInit {
       }
     });
 
-    // Si el clic fue fuera, cerramos
     if (!clicDentro) {
       this.ProductoExpandido = null;
     }
@@ -87,7 +85,6 @@ export class ConfiguracionListadoComponent implements OnInit {
 
         const data = resp.data || [];
 
-        // 🔹 Filtrar productos que sí tengan variaciones válidas
         this.InventarioOriginal = data
           .map((p: any) => ({
             ...p,
@@ -133,7 +130,6 @@ export class ConfiguracionListadoComponent implements OnInit {
   AgregarVariacion(index: number) {
     const nueva = this.NuevaVariacion[index];
 
-    // Validación de campos
     if (!nueva.TipoTela || !nueva.Tela || !nueva.Precio) {
       this.alertaServicio.MostrarAlerta('Complete los campos');
       return;

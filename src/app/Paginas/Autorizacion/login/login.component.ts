@@ -39,7 +39,6 @@ export class LoginComponent {
           const rol = usuario?.NombreRol;
           const esSuperAdmin = usuario?.SuperAdmin === 1;
 
-          // 🔴 PRIORIDAD MÁXIMA
           if (esSuperAdmin) {
             this.Router.navigate(['/menu']);
           }

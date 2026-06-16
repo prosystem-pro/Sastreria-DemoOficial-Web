@@ -175,7 +175,6 @@ export class PedidoHistorialComponent {
     this.Procesando = true;
     this.HistorialPedidoServicio.ObtenerPedido(codigo).subscribe((res: any) => {
       const data = res.data;
-      console.log('ira', data)
       this.Pedido = {
 
         CodigoPedido: data.CodigoPedido,
@@ -375,4 +374,13 @@ export class PedidoHistorialComponent {
         }
       });
   }
+
+  calcularDescuentoConRegla(subtotal: number, porcentaje: number): number {
+    if (!subtotal || !porcentaje) return 0;
+    const descuentoBruto = subtotal * (porcentaje / 100);
+    const entero = Math.floor(descuentoBruto);
+    const decimales = descuentoBruto - entero;
+    return (decimales * 100 >= 51) ? entero + 1 : entero;
+  }
+
 }

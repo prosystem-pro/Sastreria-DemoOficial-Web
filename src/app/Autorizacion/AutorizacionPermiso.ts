@@ -19,22 +19,20 @@ export class PermisoServicio {
       return false;
     }
 
-    // Acceso libre si es SuperAdmin con acceso completo
+
     if (usuario.SuperAdmin === 1 && usuario.AccesoCompleto === true) {
       return true;
     }
 
-    // Si no mandan recurso/permiso -> validar por rol
     const recursoVacio = !recurso || recurso.trim() === '';
     const permisoVacio = !permiso || permiso.trim() === '';
 
     if (recursoVacio && permisoVacio) {
-      // Si tiene un rol asignado
+
       if (usuario.CodigoRol || usuario.NombreRol) {
         return true;
       }
 
-      // Si no tiene rol pero es SuperAdmin
       if (usuario.SuperAdmin === 1) {
         return true;
       }
@@ -42,7 +40,6 @@ export class PermisoServicio {
       return false;
     }
 
-    // Validación normal por recurso/permiso
     const permisos: any[] = usuario.Permisos || [];
     const recursoEncontrado = permisos.find((r: any) => r.NombreRecurso === recurso);
 

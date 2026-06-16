@@ -19,7 +19,6 @@ export class AutorizacionRuta implements CanActivate {
 
       const tokenValido = this.LoginServicio.ValidarToken();
 
-      // ❌ TOKEN INVÁLIDO (controlado)
       if (!tokenValido) {
         this.LoginServicio.EliminarToken();
 
@@ -37,27 +36,24 @@ export class AutorizacionRuta implements CanActivate {
 
       const rolesPermitidos = next.data?.['roles'] as string[];
 
-      // 🔥 SUPERADMIN → acceso total
+
       if (superAdmin === 1) {
         return true;
       }
 
-      // ✔️ Sin restricción
+
       if (!rolesPermitidos || rolesPermitidos.length === 0) {
         return true;
       }
 
-      // ✔️ Rol válido
       if (rolesPermitidos.includes(rol!)) {
         return true;
       }
 
-      // ⚠️ ACCESO DENEGADO (controlado)
       this.alerta.MostrarAlerta(
         'No tienes permisos para acceder a esta sección.'
       );
 
-      // Redirección inteligente
       if (rol === 'EMPRESA_ASOCIADA') {
         this.router.navigate(['/menu-asociada']);
       } else if (rol === 'EMPRESA_OFICIAL') {
@@ -70,7 +66,6 @@ export class AutorizacionRuta implements CanActivate {
 
     } catch (error) {
 
-      // ❌ ERROR NO CONTROLADO
       this.alerta.MostrarError(error);
 
       this.router.navigate(['/login']);

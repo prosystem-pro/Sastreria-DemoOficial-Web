@@ -22,14 +22,12 @@ export class ClienteComponent {
   ClientesFiltrados: any[] = [];
   Error: string | null = null;
 
-  // Arrastre
   Arrastrando = false;
   InicioX = 0;
   UmbralEliminar = 80;
   ClienteArrastrado: any = null;
   ElementoFila: HTMLElement | null = null;
 
-  // Modal
   MensajeEliminarVisible = false;
   MensajeEliminarTexto = '';
 
@@ -54,7 +52,7 @@ export class ClienteComponent {
     return '/login';
   }
 
-  // ------------------- ARRASTRE -------------------
+
   IniciarArrastre(event: any, cliente: any) {
     this.Arrastrando = true;
     this.ClienteArrastrado = cliente;
@@ -102,7 +100,6 @@ export class ClienteComponent {
     this.ClienteArrastrado = null;
   }
 
-  // ------------------- MODAL -------------------
   MostrarMensajeEliminar(cliente: any, texto: string) {
     this.ClienteArrastrado = cliente;
     this.MensajeEliminarTexto = texto;
@@ -164,7 +161,7 @@ export class ClienteComponent {
     });
   }
 
-  // ------------------- CARGA Y FILTRO -------------------
+
   CargarClientes() {
     this.Procesando = true;
     this.Error = null;
@@ -206,7 +203,7 @@ export class ClienteComponent {
       );
   }
 
-  // ------------------- AUXILIARES -------------------
+
   ObtenerIniciales(nombre: string) {
     if (!nombre) return '';
     const palabras = nombre.trim().split(' ');

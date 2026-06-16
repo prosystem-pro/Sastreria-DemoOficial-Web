@@ -10,6 +10,8 @@ import { LoginServicio } from '../../../../Servicios/LoginServicio';
 import { SpinnerGlobalComponent } from '../../../../Componentes/spinner-global/spinner-global.component';
 import { ViewChild, ElementRef } from '@angular/core';
 
+
+
 type OpcionSelect = {
   value: string;
   label: string;
@@ -25,6 +27,7 @@ type OpcionSelect = {
 export class PedidoGestionComponent {
 
   @ViewChild('dateInput') dateInput!: ElementRef;
+  public Math = Math;
   FechaCargadaDeBackend: boolean = false;
   FechaEntregaFormateada: string = '';
   VerOtros: boolean = false;
@@ -1102,21 +1105,18 @@ export class PedidoGestionComponent {
   // ==============================
 
   CalcularTotales() {
-
-    const subtotal = this.Pedido.Productos
-      .reduce((acc: number, prod: any) => acc + prod.Subtotal, 0);
-
+    const subtotal = this.Pedido.Productos.reduce((acc: number, prod: any) => acc + prod.Subtotal, 0);
     const porcentaje = this.Pedido.Descuento || 0;
-
-    const descuentoMonto = subtotal * (porcentaje / 100);
-
+    const descuentoBruto = subtotal * (porcentaje / 100);
+    const entero = Math.floor(descuentoBruto);
+    const decimales = descuentoBruto - entero;
+    const descuentoMonto = (decimales * 100 >= 51) ? entero + 1 : entero;
     const total = subtotal - descuentoMonto;
-
     this.Pedido.Subtotal = subtotal;
     this.Pedido.Total = total;
-
     this.GuardarBorrador();
   }
+
   // ==============================
   // PEDIDO
   // ==============================
@@ -1438,10 +1438,6 @@ export class PedidoGestionComponent {
     }
   }
 
-
-
-
-
   onFormaPagoChange() {
     const forma = this.FormaPago.find(fp => fp.CodigoFormaPago === this.FormaPagoSeleccionada);
     // Compara el nombre en mayúsculas para que no falle por "Tarjeta" vs "TARJETA"
@@ -1451,6 +1447,7 @@ export class PedidoGestionComponent {
   }
 
   ConfirmarPedido() {
+
     // ================= VALIDACIONES =================
 
     this.MontoPago = Number(this.MontoPago);
@@ -1486,11 +1483,11 @@ export class PedidoGestionComponent {
           return;
         }
 
-        if (this.MontoPago <= 0) {
-          this.AlertaServicio.MostrarAlerta('El monto debe ser mayor a 0');
-          this.Procesando = false;
-          return;
-        }
+        // if (this.MontoPago <= 0) {
+        //   this.AlertaServicio.MostrarAlerta('El monto debe ser mayor a 0');
+        //   this.Procesando = false;
+        //   return;
+        // }
 
         if (this.MontoPago > this.Pedido.Total) {
           this.AlertaServicio.MostrarAlerta('El monto no puede ser mayor al total del pedido');
@@ -1501,7 +1498,8 @@ export class PedidoGestionComponent {
       }
 
       payload.FormaPago = this.FormaPagoSeleccionada || 1;
-      payload.MontoPago = this.MontoPago || this.Pedido.Total;
+      // payload.MontoPago = this.MontoPago || this.Pedido.Total;
+      payload.MontoPago = (this.MontoPago && this.MontoPago > 0) ? this.MontoPago : 0;
 
       const formaSeleccionada = this.FormaPago.find(
         fp => fp.CodigoFormaPago === this.FormaPagoSeleccionada
@@ -1525,6 +1523,15 @@ export class PedidoGestionComponent {
     } else {
       payload.CodigoPedido = this.Codigo;
     }
+    // 👇👇👇 SOLO ESTO AGREGO: CALCULAMOS LO MISMO QUE EN HTML Y LO ASIGNAMOS 👇👇👇
+    // Hacemos EXACTAMENTE lo mismo que en tu vista HTML
+    const valorDescuento = (this.Pedido.Subtotal || 0) * ((this.Pedido.Descuento || 0) / 100);
+    const descuentoAjustado = this.aproximarSegunRegla(valorDescuento); // <-- usa la regla que ya definimos
+    const totalAjustado = this.aproximarSegunRegla((this.Pedido.Subtotal || 0) - descuentoAjustado);
+
+    // ASIGNAMOS AL PAYLOAD LO MISMO QUE SE VE EN PANTALLA
+
+    payload.Total = totalAjustado;
 
     const servicio = this.Modo === 'CREAR'
       ? this.HistorialPedidoServicio.CrearPedido(payload)
@@ -1791,4 +1798,34 @@ export class PedidoGestionComponent {
       (campo) => !prod.Medidas?.[campo]
     );
   }
+
+  // ✅ Función con la regla exacta: ≥0.51 sube, ≤0.50 baja
+  aproximarSegunRegla(valor: number): number {
+    const entero = Math.floor(valor);
+    const decimales = valor - entero;
+
+    // Multiplicamos por 100 para comparar como enteros (evitamos errores de decimales)
+    if (decimales * 100 >= 51) {
+      return entero + 1; // sube
+    } else {
+      return entero; // baja
+    }
+  }
+
+  // ✅ Obtiene el descuento ya aproximado
+  getDescuentoAprox(subtotal: number, porcentajeDescuento: number): number {
+    subtotal = subtotal || 0;
+    porcentajeDescuento = porcentajeDescuento || 0;
+    const valorDescuento = subtotal * (porcentajeDescuento / 100);
+    return this.aproximarSegunRegla(valorDescuento);
+  }
+
+  // ✅ Total = Subtotal - Descuento aproximado
+  getTotalCalculado(subtotal: number, porcentajeDescuento: number): number {
+    subtotal = subtotal || 0;
+    const descuento = this.getDescuentoAprox(subtotal, porcentajeDescuento);
+    const totalBruto = subtotal - descuento;
+    return this.aproximarSegunRegla(totalBruto);
+  }
+
 }
