@@ -845,7 +845,7 @@
                             </label>
 
                             <!-- NUMBER -->
-                            <input *ngIf="TituloMedidas[campo]?.tipo === 'number'" type="text" inputmode="decimal"
+                            <input *ngIf="TituloMedidas[campo]?.tipo === 'number'" type="text"  inputmode="text"
                                 class="form-control form-control-sm bg-light border border-secondary fw-bold text-center"  (input)="NormalizarMedida($event, campo)"
                                 [placeholder]="ObtenerPlaceholder(campo)" [(ngModel)]="ProductoMedidas.Medidas[campo]">
 
