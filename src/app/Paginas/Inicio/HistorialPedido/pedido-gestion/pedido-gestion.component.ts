@@ -250,7 +250,7 @@ export class PedidoGestionComponent {
 
     const target = event.target as HTMLElement;
 
-    // Si NO hizo click dentro de un select
+
     if (!target.closest('.input-group') && !target.closest('.list-group')) {
 
       this.CerrarTodasLasListas();
@@ -271,8 +271,8 @@ export class PedidoGestionComponent {
   NormalizarTexto(texto: string): string {
     return (texto || '')
       .toLowerCase()
-      .normalize('NFD') // separa tildes
-      .replace(/[\u0300-\u036f]/g, ''); // elimina tildes
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
   ObtenerCamposMedidas(producto: any): string[] {
 
@@ -393,7 +393,7 @@ export class PedidoGestionComponent {
         next: (resp: any) => {
 
           this.ListaPagos = resp?.data || [];
-          // suma directa aquí
+
           this.TotalAbonadoPagos = this.ListaPagos.reduce(
             (total: number, p: any) => total + Number(p.Monto || 0),
             0
@@ -512,7 +512,7 @@ export class PedidoGestionComponent {
 
     if (desplazamiento > this.UmbralEliminarProducto) {
 
-      // 🔹 Usamos la confirmación de Bootstrap/Swal
+
       this.AlertaServicio.Confirmacion(
         'Eliminar producto',
         '¿Desea eliminar este producto?',
@@ -555,11 +555,6 @@ export class PedidoGestionComponent {
   }
 
   // ==============================
-  // LIFECYCLE
-  // ==============================
-
-
-  // ==============================
   // CARGA DE CATÁLOGOS
   // ==============================
 
@@ -582,16 +577,12 @@ export class PedidoGestionComponent {
 
           this.MostrarListas['TipoProducto'] = false;
 
-          // =========================
-          // 🔥 CLAVE: CARGAR PRODUCTOS
-          // =========================
           this.HistorialPedidoServicio
             .ListadoProducto(unico.CodigoTipoProducto)
             .subscribe((res: any) => {
 
               this.Productos = res.data;
 
-              // limpiar selección previa de producto
               this.ProductoTemp.CodigoTipoProducto = unico.CodigoTipoProducto;
               this.ProductoTemp.NombreTipoProducto = unico.NombreTipoProducto;
               this.Filtros['TipoProducto'] = unico.NombreTipoProducto;
@@ -660,10 +651,6 @@ export class PedidoGestionComponent {
         this.Clientes = res.data;
       });
   }
-
-  // ==============================
-  // BUSCADOR / FILTROS
-  // ==============================
 
   Filtrados(key: string, lista: any[], campoNombre: string) {
 
@@ -774,7 +761,7 @@ export class PedidoGestionComponent {
     this.Filtros['Producto'] = producto.NombreProducto;
     this.MostrarListas['Producto'] = false;
 
-    // 🔥 LIMPIAR VARIACIONES ANTES
+
     this.TiposTela = [];
     this.Telas = [];
 
@@ -970,7 +957,6 @@ export class PedidoGestionComponent {
 
       this.Pedido.Productos[index].Cantidad += cantidad;
 
-      // 🔥 IMPORTANTE: mantener lógica de precio según rol
       if (this.EsAsociada()) {
         this.Pedido.Productos[index].Precio = 0;
       }
@@ -996,7 +982,7 @@ export class PedidoGestionComponent {
 
     this.ProductoTemp.Cantidad = valor ? Number(valor) : 0;
 
-    // 🔥 FORZAR el valor en el input (clave)
+
     event.target.value = valor;
   }
   SoloNumerosEnterosMonto(event: any) {
@@ -1523,13 +1509,10 @@ export class PedidoGestionComponent {
     } else {
       payload.CodigoPedido = this.Codigo;
     }
-    // 👇👇👇 SOLO ESTO AGREGO: CALCULAMOS LO MISMO QUE EN HTML Y LO ASIGNAMOS 👇👇👇
-    // Hacemos EXACTAMENTE lo mismo que en tu vista HTML
-    const valorDescuento = (this.Pedido.Subtotal || 0) * ((this.Pedido.Descuento || 0) / 100);
-    const descuentoAjustado = this.aproximarSegunRegla(valorDescuento); // <-- usa la regla que ya definimos
-    const totalAjustado = this.aproximarSegunRegla((this.Pedido.Subtotal || 0) - descuentoAjustado);
 
-    // ASIGNAMOS AL PAYLOAD LO MISMO QUE SE VE EN PANTALLA
+    const valorDescuento = (this.Pedido.Subtotal || 0) * ((this.Pedido.Descuento || 0) / 100);
+    const descuentoAjustado = this.aproximarSegunRegla(valorDescuento);
+    const totalAjustado = this.aproximarSegunRegla((this.Pedido.Subtotal || 0) - descuentoAjustado);
 
     payload.Total = totalAjustado;
 
@@ -1799,20 +1782,18 @@ export class PedidoGestionComponent {
     );
   }
 
-  // ✅ Función con la regla exacta: ≥0.51 sube, ≤0.50 baja
   aproximarSegunRegla(valor: number): number {
     const entero = Math.floor(valor);
     const decimales = valor - entero;
 
-    // Multiplicamos por 100 para comparar como enteros (evitamos errores de decimales)
+
     if (decimales * 100 >= 51) {
-      return entero + 1; // sube
+      return entero + 1;
     } else {
-      return entero; // baja
+      return entero;
     }
   }
 
-  // ✅ Obtiene el descuento ya aproximado
   getDescuentoAprox(subtotal: number, porcentajeDescuento: number): number {
     subtotal = subtotal || 0;
     porcentajeDescuento = porcentajeDescuento || 0;
@@ -1820,12 +1801,19 @@ export class PedidoGestionComponent {
     return this.aproximarSegunRegla(valorDescuento);
   }
 
-  // ✅ Total = Subtotal - Descuento aproximado
   getTotalCalculado(subtotal: number, porcentajeDescuento: number): number {
     subtotal = subtotal || 0;
     const descuento = this.getDescuentoAprox(subtotal, porcentajeDescuento);
     const totalBruto = subtotal - descuento;
     return this.aproximarSegunRegla(totalBruto);
   }
+  NormalizarMedida(event: any, campo: string) {
+    let value = event.target.value;
 
+    value = value.replace(/[^0-9./-]/g, '');
+
+    value = value.replace(/(\..*)\./g, '$1');
+
+    this.ProductoMedidas.Medidas[campo] = value;
+  }
 }
