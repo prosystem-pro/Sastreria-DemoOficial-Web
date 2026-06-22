@@ -1807,16 +1807,12 @@ export class PedidoGestionComponent {
     const totalBruto = subtotal - descuento;
     return this.aproximarSegunRegla(totalBruto);
   }
-NormalizarMedida(event: any, campo: string) {
-  let value = event.target.value;
 
-  value = value.replace(/[^0-9./-]/g, '');
-
-  value = value.replace(/(\..*)\./g, '$1');
-
-  this.ProductoMedidas.Medidas[campo] = value;
-
-  event.target.value = value;
-}
-
+  NormalizarMedida(event: any, campo: string) {
+    let value = event.target.value;
+    value = value.replace(/[^0-9./-]/g, '');
+    value = value.replace(/(\..*)\./g, '$1');
+    this.ProductoMedidas.Medidas[campo] = value;
+    event.target.value = value;
+  }
 }
