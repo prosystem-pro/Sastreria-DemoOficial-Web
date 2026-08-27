@@ -2,36 +2,43 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
 import { ReporteServicio } from '../../../../Servicios/ReporteServicio';
 import { SpinnerGlobalComponent } from '../../../../Componentes/spinner-global/spinner-global.component';
 
-
 @Component({
-  selector: 'app-reporte-pedido',
+  selector: 'app-reporte-ganancias',
   imports: [FormsModule, CommonModule, SpinnerGlobalComponent],
-  templateUrl: './reporte-pedido.component.html',
-  styleUrl: './reporte-pedido.component.css'
+  templateUrl: './reporte-ganancias.component.html',
+  styleUrl: './reporte-ganancias.component.css'
 })
-export class ReportePedidoComponent implements OnInit {
-  @ViewChild('dateInicio') dateInicio!: ElementRef<HTMLInputElement>;
+export class ReporteGananciasComponent {
+ @ViewChild('dateInicio') dateInicio!: ElementRef<HTMLInputElement>;
   @ViewChild('dateFin') dateFin!: ElementRef<HTMLInputElement>;
   FechaInicioFormateada: string = '';
   FechaFinFormateada: string = '';
   rutaActual = '';
   FechaInicio: string = '';
   FechaFin: string = '';
-
   cargando: boolean = false;
 
+
   reporte: any = {
-    TotalPedidos: 0,
-    MontoPedidos: 0,
-    TotalAbono: 0,
-    SaldoPendiente: 0,
-    CostoPedidos: 0,
-    GananciaPedidos: 0
+    TotalVentaPedido: 0,
+    Distribucion: {
+      Contado: 0,
+      Pedido: 0
+    },
+    TotalVendidoVentaPedido: 0,  
+    Desglose: {                 
+      Contado: 0,
+      Pedido: 0
+    },
+    Costos: {                   
+      TotalCosto: 0,
+      Ganancia: 0
+    }
   };
+
 
   constructor(
     private reporteServicio: ReporteServicio,
@@ -43,60 +50,45 @@ export class ReportePedidoComponent implements OnInit {
     this.SetearFechasMesActual();
     this.CargarReporte();
   }
+
   SetearFechasMesActual() {
-
     const hoy = new Date();
-
-    // 🔥 PRIMER DÍA DEL MES
     const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-
-    // 🔥 HOY
     const fin = hoy;
-
-    // 👉 FORMATO yyyy-MM-dd
     this.FechaInicio = this.FormatoInput(inicio);
     this.FechaFin = this.FormatoInput(fin);
-
-    // 👉 FORMATO VISUAL
     this.FechaInicioFormateada = this.FormatearFecha(this.FechaInicio);
     this.FechaFinFormateada = this.FormatearFecha(this.FechaFin);
   }
+
   FormatoInput(fecha: Date): string {
     const anio = fecha.getFullYear();
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const dia = String(fecha.getDate()).padStart(2, '0');
-
     return `${anio}-${mes}-${dia}`;
   }
+
   CargarReporte() {
-
     this.cargando = true;
-
-    this.reporteServicio.ReportePedidos(
+    this.reporteServicio.ReporteGanancia(
       this.FechaInicio,
       this.FechaFin
     ).subscribe({
-
       next: (resp) => {
-
         this.reporte = resp.data;
         this.cargando = false;
-
       },
-
       error: (err) => {
-
         console.error(err);
         this.cargando = false;
-
       }
-
     });
   }
 
   Buscar() {
     this.CargarReporte();
   }
+
   AbrirDatePicker(tipo: 'inicio' | 'fin') {
     if (tipo === 'inicio') {
       this.dateInicio.nativeElement.showPicker();
@@ -104,6 +96,7 @@ export class ReportePedidoComponent implements OnInit {
       this.dateFin.nativeElement.showPicker();
     }
   }
+
   OnFechaInicioChange() {
     this.FechaInicioFormateada = this.FormatearFecha(this.FechaInicio);
   }
@@ -111,20 +104,18 @@ export class ReportePedidoComponent implements OnInit {
   OnFechaFinChange() {
     this.FechaFinFormateada = this.FormatearFecha(this.FechaFin);
   }
+
   FormatearFecha(fecha: string): string {
     if (!fecha) return '';
-
     const [anio, mes, dia] = fecha.split('-');
     return `${dia}/${mes}/${anio}`;
   }
 
   Limpiar() {
-
     this.SetearFechasMesActual();
-
     this.CargarReporte();
-
   }
+
   IrARuta(ruta: string) {
     this.Router.navigate([ruta]);
   }

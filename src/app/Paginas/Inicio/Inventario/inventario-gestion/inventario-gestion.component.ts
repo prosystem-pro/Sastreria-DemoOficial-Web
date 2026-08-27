@@ -31,6 +31,7 @@ export class InventarioGestionComponent {
     Talla: 0,
     Color: 0,
     Precio: 0,
+    PrecioCosto: 0,
     Stock: 0,
     Estatus: 1,
     EstatusSwitch: true
@@ -117,6 +118,7 @@ export class InventarioGestionComponent {
 
           // PRECIO Y STOCK
           this.Inventario.Precio = data.PrecioVenta || 0;
+          this.Inventario.PrecioCosto = data.PrecioCosto || 0;
           this.Inventario.Stock = data.StockActual || 0;
           // ESTATUS
           this.Inventario.Estatus = data.Estatus || 1;
@@ -239,6 +241,7 @@ export class InventarioGestionComponent {
 
       CodigoBarra: this.Inventario.CodigoBarra,
       Precio: this.Inventario.Precio,
+      PrecioCosto: this.Inventario.PrecioCosto,
       Stock: this.Inventario.Stock,
 
       Estatus: this.Inventario.EstatusSwitch ? 1 : 2,
@@ -507,33 +510,33 @@ export class InventarioGestionComponent {
     }
   }
 
-FormatearTexto(event: any) {
+  FormatearTexto(event: any) {
 
-  let valor = event.target.value;
+    let valor = event.target.value;
 
-  valor = valor
+    valor = valor
 
-    // quitar especiales y tildes
-    .replace(/[^a-zA-Z0-9ñÑ ]/g, '')
+      // quitar especiales y tildes
+      .replace(/[^a-zA-Z0-9ñÑ ]/g, '')
 
-    // evitar múltiples espacios
-    .replace(/\s+/g, ' ')
+      // evitar múltiples espacios
+      .replace(/\s+/g, ' ')
 
-    // evitar espacio inicial
-    .trimStart()
+      // evitar espacio inicial
+      .trimStart()
 
-    // capitalizar
-    .toLowerCase()
-.replace(/\b[a-z0-9ñ]/g, (l: string) => l.toUpperCase());
+      // capitalizar
+      .toLowerCase()
+      .replace(/\b[a-z0-9ñ]/g, (l: string) => l.toUpperCase());
 
-  // actualizar input REAL
-  event.target.value = valor;
+    // actualizar input REAL
+    event.target.value = valor;
 
-  // sincronizar modelo angular
-  const ngControl = event.target.getAttribute('ng-reflect-model');
+    // sincronizar modelo angular
+    const ngControl = event.target.getAttribute('ng-reflect-model');
 
-  this.NombreNuevoCatalogo = valor;
-}
+    this.NombreNuevoCatalogo = valor;
+  }
   RecargarCatalogoPrincipal() {
 
     this.CargarCatalogo('Marcas', this.InventarioServicio.ListadoMarca());
@@ -856,6 +859,12 @@ FormatearTexto(event: any) {
     // Permitir vacío mientras escribe (mejor UX)
     this.Inventario.Precio = valor;
     event.target.value = valor;
+  }
+  NormalizarPrecioCostoInput(event: any) {
+    let valor = event.target.value;
+    valor = valor.replace(/[^0-9.,]/g, '');
+    valor = valor.replace(',', '.');
+    this.Inventario.PrecioCosto = valor;  
   }
 
   NormalizarStockInput(event: any) {

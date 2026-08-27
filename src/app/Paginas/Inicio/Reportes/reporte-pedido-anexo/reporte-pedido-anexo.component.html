@@ -23,45 +23,60 @@
             <div class="card shadow-sm" style="margin-top:0;">
 
                 <!-- NAV REPORTES -->
-                <div class="card-body pb-2">
-
-                    <div class="row g-2 text-center">
-
+                <div class="card-body pb-2 px-2">
+                    <div class="d-flex flex-wrap rounded bg-light border overflow-hidden">
                         <!-- VENTAS -->
-                        <div class="col-4">
-                            <button class="btn w-100" [ngClass]="{
-                                    'btn-dark': rutaActual == '/reporte-venta',
-                                    'btn-outline-dark': rutaActual != '/reporte-venta'
-                                }" (click)="IrARuta('/reporte-venta')">
-                                <div class="fs-4">💰</div>
-                                <small>Ventas</small>
-                            </button>
-                        </div>
+                        <button class="btn flex-grow-1 py-2 px-3 position-relative" [ngClass]="{
+            'bg-white text-dark fw-semibold shadow-sm': rutaActual == '/reporte-venta',
+            'text-muted': rutaActual != '/reporte-venta'
+        }" (click)="IrARuta('/reporte-venta')">
+                            <span class="me-2">💰</span>
+                            <span>Ventas</span>
+                            <div *ngIf="rutaActual == '/reporte-venta'"
+                                class="position-absolute bottom-0 start-50 translate-middle-x"
+                                style="width: 30%; height: 3px; background-color: #4b5563; border-radius: 3px 3px 0 0;">
+                            </div>
+                        </button>
 
                         <!-- PEDIDOS -->
-                        <div class="col-4">
-                            <button class="btn w-100" [ngClass]="{
-                                    'btn-dark': rutaActual == '/reporte-pedido',
-                                    'btn-outline-dark': rutaActual != '/reporte-pedido'
-                                }" (click)="IrARuta('/reporte-pedido')">
-                                <div class="fs-4">🧾</div>
-                                <small>Pedidos</small>
-                            </button>
-                        </div>
+                        <button class="btn flex-grow-1 py-2 px-3 position-relative" [ngClass]="{
+            'bg-white text-dark fw-semibold shadow-sm': rutaActual == '/reporte-pedido',
+            'text-muted': rutaActual != '/reporte-pedido'
+        }" (click)="IrARuta('/reporte-pedido')">
+                            <span class="me-2">🧾</span>
+                            <span>Pedidos</span>
+                            <div *ngIf="rutaActual == '/reporte-pedido'"
+                                class="position-absolute bottom-0 start-50 translate-middle-x"
+                                style="width: 30%; height: 3px; background-color: #4b5563; border-radius: 3px 3px 0 0;">
+                            </div>
+                        </button>
+
+                        <!-- GANANCIAS -->
+                        <button class="btn flex-grow-1 py-2 px-3 position-relative" [ngClass]="{
+            'bg-white text-dark fw-semibold shadow-sm': rutaActual == '/reporte-ganancia',
+            'text-muted': rutaActual != '/reporte-ganancia'
+        }" (click)="IrARuta('/reporte-ganancia')">
+                            <span class="me-2">📈</span>
+                            <span>Ganancias</span>
+                            <div *ngIf="rutaActual == '/reporte-ganancia'"
+                                class="position-absolute bottom-0 start-50 translate-middle-x"
+                                style="width: 30%; height: 3px; background-color: #4b5563; border-radius: 3px 3px 0 0;">
+                            </div>
+                        </button>
 
                         <!-- ANEXOS -->
-                        <div class="col-4">
-                            <button class="btn w-100" [ngClass]="{
-                                    'btn-dark': rutaActual == '/reporte-pedido-anexo',
-                                    'btn-outline-dark': rutaActual != '/reporte-pedido-anexo'
-                                }" (click)="IrARuta('/reporte-pedido-anexo')">
-                                <div class="fs-4">📁</div>
-                                <small>Anexos</small>
-                            </button>
-                        </div>
-
+                        <button class="btn flex-grow-1 py-2 px-3 position-relative" [ngClass]="{
+            'bg-white text-dark fw-semibold shadow-sm': rutaActual == '/reporte-pedido-anexo',
+            'text-muted': rutaActual != '/reporte-pedido-anexo'
+        }" (click)="IrARuta('/reporte-pedido-anexo')">
+                            <span class="me-2">📁</span>
+                            <span>Anexos</span>
+                            <div *ngIf="rutaActual == '/reporte-pedido-anexo'"
+                                class="position-absolute bottom-0 start-50 translate-middle-x"
+                                style="width: 30%; height: 3px; background-color: #4b5563; border-radius: 3px 3px 0 0;">
+                            </div>
+                        </button>
                     </div>
-
                 </div>
 
                 <hr class="mt-1 mb-2">
@@ -169,105 +184,51 @@
 
                         <div class="row">
 
-                            <!-- TOTAL PEDIDOS -->
-                            <div class="col-6 mb-3">
+<!-- TOTAL PEDIDOS -->
+<div class="col-6 mb-3">
+    <div class="card border-0 shadow-sm text-center h-100" style="background-color: #eef2ff;">
+        <div class="card-body p-2">
+            <div class="fs-3 mb-1">📦</div>
+            <small class="text-muted d-block">Total Pedidos</small>
+            <h5 class="fw-bold mb-0">{{ reporte.TotalPedidos }}</h5>
+        </div>
+    </div>
+</div>
 
-                                <div class="card border-0 shadow-sm text-center h-100">
+<!-- MONTO PEDIDOS -->
+<div class="col-6 mb-3">
+    <div class="card border-0 shadow-sm text-center h-100" style="background-color: #fffbeb;">
+        <div class="card-body p-2">
+            <div class="fs-3 mb-1">💵</div>
+            <small class="text-muted d-block">Monto Pedidos</small>
+            <h5 class="fw-bold mb-0">Q {{ reporte.MontoPedidos }}</h5>
+        </div>
+    </div>
+</div>
 
-                                    <div class="card-body p-2">
+<!-- TOTAL ABONO -->
+<div class="col-6 mb-3">
+    <div class="card border-0 shadow-sm text-center h-100" style="background-color: #eff8ff;">
+        <div class="card-body p-2">
+            <div class="fs-3 mb-1">💳</div>
+            <small class="text-muted d-block">Total Abonado</small>
+            <h5 class="fw-bold mb-0">Q {{ reporte.TotalAbono }}</h5>
+        </div>
+    </div>
+</div>
 
-                                        <div class="fs-3 mb-1">
-                                            📦
-                                        </div>
+<!-- SALDO PENDIENTE -->
+<div class="col-6 mb-3">
+    <div class="card border-0 shadow-sm text-center h-100" style="background-color: #fef2f2;">
+        <div class="card-body p-2">
+            <div class="fs-3 mb-1">⚠️</div>
+            <small class="text-muted d-block">Saldo Pendiente</small>
+            <h5 class="fw-bold mb-0">Q {{ reporte.SaldoPendiente }}</h5>
+        </div>
+    </div>
+</div>
 
-                                        <small class="text-muted d-block">
-                                            Total Pedidos
-                                        </small>
 
-                                        <h5 class="fw-bold mb-0">
-                                            {{ reporte.TotalPedidos }}
-                                        </h5>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- MONTO PEDIDOS -->
-                            <div class="col-6 mb-3">
-
-                                <div class="card border-0 shadow-sm text-center h-100">
-
-                                    <div class="card-body p-2">
-
-                                        <div class="fs-3 mb-1">
-                                            💵
-                                        </div>
-
-                                        <small class="text-muted d-block">
-                                            Monto Pedidos
-                                        </small>
-
-                                        <h5 class="fw-bold mb-0">
-                                            Q {{ reporte.MontoPedidos }}
-                                        </h5>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- TOTAL ABONO -->
-                            <div class="col-6 mb-3">
-
-                                <div class="card border-0 shadow-sm text-center h-100">
-
-                                    <div class="card-body p-2">
-
-                                        <div class="fs-3 mb-1">
-                                            💳
-                                        </div>
-
-                                        <small class="text-muted d-block">
-                                            Total Abonado
-                                        </small>
-
-                                        <h5 class="fw-bold mb-0">
-                                            Q {{ reporte.TotalAbono }}
-                                        </h5>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- SALDO PENDIENTE -->
-                            <div class="col-6 mb-3">
-
-                                <div class="card border-0 shadow-sm text-center h-100">
-
-                                    <div class="card-body p-2">
-
-                                        <div class="fs-3 mb-1">
-                                            ⚠️
-                                        </div>
-
-                                        <small class="text-muted d-block">
-                                            Saldo Pendiente
-                                        </small>
-
-                                        <h5 class="fw-bold mb-0">
-                                            Q {{ reporte.SaldoPendiente }}
-                                        </h5>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
 
                         </div>
 

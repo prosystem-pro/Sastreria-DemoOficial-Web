@@ -25,7 +25,9 @@ export class ReporteVentaComponent {
   reporte: any = {
     TotalVentas: 0,
     TotalTransacciones: 0,
-    MontoTotal: 0
+    MontoTotal: 0,
+    CantidadVentasCosto: 0,
+    MontoCostoTotal: 0
   };
 
   constructor(
@@ -58,34 +60,28 @@ export class ReporteVentaComponent {
     this.FechaInicioFormateada = this.FormatearFecha(this.FechaInicio);
     this.FechaFinFormateada = this.FormatearFecha(this.FechaFin);
   }
-  CargarReporte() {
 
+  CargarReporte() {
     this.cargando = true;
 
     this.reporteServicio.ReporteVentas(
       this.FechaInicio,
       this.FechaFin
     ).subscribe({
-
       next: (resp) => {
-
-        this.reporte = resp.data;
-
+        this.reporte.TotalVentas = resp.data?.TotalVentas || 0;
+        this.reporte.MontoVentas = resp.data?.MontoVentas || 0;
+        this.reporte.MontoCostoTotal = resp.data?.MontoCostoTotal || 0; 
+        this.reporte.Ganancia = resp.data?.Ganancia || 0; 
         this.cargando = false;
-
       },
-
       error: (err) => {
-
         console.error(err);
-
         this.cargando = false;
-
       }
-
     });
-
   }
+
   AbrirDatePicker(tipo: 'inicio' | 'fin') {
     if (tipo === 'inicio') {
       this.dateInicio.nativeElement.showPicker();
@@ -110,13 +106,13 @@ export class ReporteVentaComponent {
     this.CargarReporte();
   }
 
-Limpiar() {
+  Limpiar() {
 
-  this.InicializarFechasMesActual();
+    this.InicializarFechasMesActual();
 
-  this.CargarReporte();
+    this.CargarReporte();
 
-}
+  }
   IrARuta(ruta: string) {
     this.Router.navigate([ruta]);
   }

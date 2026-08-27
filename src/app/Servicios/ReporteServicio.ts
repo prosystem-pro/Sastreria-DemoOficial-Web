@@ -27,6 +27,26 @@ export class ReporteServicio {
 
         return this.http.get(url);
     }
+    ReporteGanancia(
+        FechaInicio?: string,
+        FechaFin?: string
+    ): Observable<any> {
+        let url = `${this.Url}/ganancia`;
+        if (FechaInicio && FechaFin) {
+            url += `?FechaInicio=${FechaInicio}&FechaFin=${FechaFin}`;
+        }
+        return this.http.get(url);
+    }
+    ReporteCostosVentas(
+        FechaInicio?: string,
+        FechaFin?: string
+    ): Observable<any> {
+        let url = `${this.Url}/costos-ventas`;
+        if (FechaInicio && FechaFin) {
+            url += `?FechaInicio=${FechaInicio}&FechaFin=${FechaFin}`;
+        }
+        return this.http.get(url);
+    }
 
     ReportePedidos(
         FechaInicio?: string,

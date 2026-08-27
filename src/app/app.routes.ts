@@ -23,6 +23,8 @@ import { MenuOficialComponent } from './Paginas/Inicio/Anexos/Oficial/menu-ofici
 import { MenuAsociadaComponent } from './Paginas/Inicio/Anexos/Asociada/menu-asociada/menu-asociada.component';
 import { PagoImpresionComponent } from './Paginas/Inicio/HistorialPedido/pago-impresion/pago-impresion.component';
 import { ReportePedidoAnexoComponent } from './Paginas/Inicio/Reportes/reporte-pedido-anexo/reporte-pedido-anexo.component';
+import { ReporteGananciasComponent } from './Paginas/Inicio/Reportes/reporte-ganancias/reporte-ganancias.component';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -52,6 +54,7 @@ export const routes: Routes = [
   { path: 'configuracion-gestion/:codigoinventario', component: ConfiguracionGestionComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },
   { path: 'reporte-venta', component: ReporteVentaComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },
   { path: 'reporte-pedido', component: ReportePedidoComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },
+  { path: 'reporte-ganancia', component: ReporteGananciasComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },
   { path: 'reporte-pedido-anexo', component: ReportePedidoAnexoComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },
   { path: 'menu-asociada', component: MenuAsociadaComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_ASOCIADA'] } },
   { path: 'menu-oficial', component: MenuOficialComponent, canActivate: [AutorizacionRuta], data: { roles: ['EMPRESA_OFICIAL'] } },

@@ -123,31 +123,38 @@
               </div>
 
               <!-- PRECIO -->
-              <div class="col-12 col-md-6 mb-3">
+<!-- PRECIO DE VENTA -->
+<div class="col-12 col-md-6 mb-3">
+  <label class="form-label d-flex align-items-center gap-2">
+    <i class="bi bi-cash-coin"></i>
+    Precio Venta
+  </label>
+  <input type="text" inputmode="decimal" class="form-control form-control-sm"
+    [(ngModel)]="Inventario.Precio" name="Precio" autocomplete="off"
+    (input)="NormalizarPrecioInput($event)">
+</div>
 
-                <label class="form-label d-flex align-items-center gap-2">
-                  <i class="bi bi-cash-coin"></i>
-                  Precio
-                </label>
+<!-- ✅ PRECIO DE COSTO — AGREGA ESTE BLOQUE COMPLETO -->
+<div class="col-12 col-md-6 mb-3">
+  <label class="form-label d-flex align-items-center gap-2">
+    <i class="bi bi-tag"></i>
+    Precio Costo
+  </label>
+  <input type="text" inputmode="decimal" class="form-control form-control-sm"
+    [(ngModel)]="Inventario.PrecioCosto" name="PrecioCosto" autocomplete="off"
+    (input)="NormalizarPrecioCostoInput($event)">
+</div>
 
-                <input type="text" inputmode="decimal" class="form-control form-control-sm"
-                  [(ngModel)]="Inventario.Precio" name="Precio" autocomplete="off"
-                  (input)="NormalizarPrecioInput($event)">
+<!-- STOCK -->
+<div class="col-12 col-md-6 mb-3">
+  <label class="form-label d-flex align-items-center gap-2">
+    <i class="bi bi-box-fill"></i>
+    Stock
+  </label>
+  <input type="text" inputmode="decimal" class="form-control form-control-sm"
+    [(ngModel)]="Inventario.Stock" name="Stock" autocomplete="off" (input)="NormalizarStockInput($event)">
+</div>
 
-              </div>
-
-              <!-- STOCK -->
-              <div class="col-12 col-md-6 mb-3">
-
-                <label class="form-label d-flex align-items-center gap-2">
-                  <i class="bi bi-box-fill"></i>
-                  Stock
-                </label>
-
-                <input type="text" inputmode="decimal" class="form-control form-control-sm"
-                  [(ngModel)]="Inventario.Stock" name="Stock" autocomplete="off" (input)="NormalizarStockInput($event)">
-
-              </div>
 
               <!-- SWITCH ESTATUS SOLO EN EDICION -->
               <div class="col-12 mb-3" *ngIf="Inventario.CodigoInventario">
@@ -212,7 +219,7 @@
           <input type="text" class="form-control" [placeholder]="'Debe seleccionar ' + label.toLowerCase()"
             [(ngModel)]="Filtros[tipo]" [ngModelOptions]="{standalone:true}" autocomplete="off" [readonly]="readonly"
             [style.cursor]="readonly ? 'not-allowed' : 'text'" (keydown)="ValidarTexto($event)"
-          (input)="FormatearTexto($event)">
+            (input)="FormatearTexto($event)">
 
           <span class="input-group-text bg-white">
             <i class="bi bi-caret-down-fill"></i>
