@@ -241,9 +241,11 @@ export class PedidoListadoComponent implements OnInit {
 
     this.PedidosFiltrados = this.PedidosOriginal
       .filter(p => {
-
+        const termino = (this.Busqueda || '').toLowerCase().trim();
+       
         const coincideBusqueda =
-          p.NombreCliente?.toLowerCase().includes(this.Busqueda.toLowerCase());
+          p.NombreCliente?.toLowerCase().includes(termino) ||
+          String(p.CodigoPedido).includes(termino);
 
         const [fecha] = (p.FechaCreacion || '').split(' ');
         const [dia, mes, anio] = (fecha || '').split('/');

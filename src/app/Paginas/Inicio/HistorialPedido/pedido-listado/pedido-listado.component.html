@@ -141,7 +141,7 @@
                         </div>
                         <!-- NOMBRE -->
                         <h6 class="fw-bold mb-1" style="font-size:0.9rem;">
-                            {{ Pedido.NombreCliente }}
+                            <span class="text-dark">#{{ Pedido.CodigoPedido }}</span>  {{ Pedido.NombreCliente }}
 
                             <span class="text-muted fw-normal"
                                 *ngIf="EsAsociada() || EsSuperAdmin() || (EsOficial() && VerOtros)">
